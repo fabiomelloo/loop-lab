@@ -1,0 +1,41 @@
+apiVersion: koyeb.io/v1alpha1
+kind: App
+metadata:
+  name: loop-lab
+spec:
+  services:
+  - name: web
+    healthChecks:
+      http:
+        path: /
+        port: 8000
+    routes:
+    - path: /
+      pathType: Prefix
+    runCommand: php -d variables_order=EGPCS artisan serve --host=0.0.0.0 --port=8000
+    env:
+    - key: APP_NAME
+      value: "Loop Lab"
+    - key: APP_ENV
+      value: "production"
+    - key: APP_DEBUG
+      value: "false"
+    - key: LOG_CHANNEL
+      value: "stack"
+    - key: DB_CONNECTION
+      value: "sqlite"
+    - key: DB_DATABASE
+      value: "database/database.sqlite"
+    ports:
+    - name: http
+      port: 8000
+      protocol: HTTP
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    builderFlags:
+    - buildpack=nixpacks
+  deployments:
+    git:
+      branch: main
+      repository: fabiomelloo/loop-lab
