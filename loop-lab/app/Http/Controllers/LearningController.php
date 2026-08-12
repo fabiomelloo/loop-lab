@@ -142,6 +142,9 @@ class LearningController extends Controller
 
     private function navigation(): array
     {
-        return ['modules' => Module::with('lessons')->orderBy('position')->get()];
+        return [
+            'modules' => Module::with('lessons')->orderBy('position')->get(),
+            'completedLessonIds' => $this->progress->completedLessonIds(),
+        ];
     }
 }

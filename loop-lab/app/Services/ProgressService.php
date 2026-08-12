@@ -6,6 +6,7 @@ use App\Models\Exercise;
 use App\Models\ExerciseAttempt;
 use App\Models\Learner;
 use App\Models\UserProgress;
+use Illuminate\Support\Facades\DB;
 
 class ProgressService
 {
@@ -72,6 +73,24 @@ class ProgressService
     {
         return UserProgress::where('learner_key', $this->learnerKey())
             ->pluck('exercise_id')
+            ->all();
+    }
+
+    public function completedLessonIds(): array
+    {
+        $key = $this->learnerKey();
+        $completedExerciseIds = $this->completedExerciseIds();
+
+        if (empty($completedExerciseIds)) {
+            return [];
+        }
+
+        // Obter lições que têm TODOS os exercícios completos
+        return DB::table('exercises')
+            ->select('lesson_id')
+            ->groupBy('lesson_id')
+            ->havingRaw('COUNT(id) = SUM(CASE WHEN id IN (' . implode(',', $completedExerciseIds) . ') THEN 1 ELSE 0 END)')
+            ->pluck('lesson_id')
             ->all();
     }
 }
