@@ -3,7 +3,6 @@
 @section('content')
 @php
     $currentIndex = $lesson->exercises->search(fn ($item) => $item->is($exercise));
-    $nextExercise = $lesson->exercises->get($currentIndex + 1);
 @endphp
 
 <span class="eyebrow">{{ $lesson->module->title }} · Aula</span>
@@ -57,14 +56,14 @@
 <section id="praticar" class="lesson-section practice-section">
     <div class="section-heading">
         <span class="section-number">2</span>
-        <div><span class="eyebrow">Agora é sua vez</span><h2>Praticar com exercícios</h2><p>Escolha um exercício e resolva uma etapa por vez.</p></div>
+        <div><span class="eyebrow">Agora é sua vez</span><h2>Praticar com exercícios</h2><p>Resolva na ordem: o próximo exercício reutiliza o raciocínio do anterior.</p></div>
     </div>
 
     <nav class="exercise-list" aria-label="Exercícios desta aula">
         @foreach($lesson->exercises as $item)
         <a class="exercise-item {{ $item->is($exercise) ? 'active' : '' }}" data-spa data-exercise-id="{{ $item->id }}" href="{{ route('lessons.show', [$lesson, $item]) }}#praticar" @if($item->is($exercise)) aria-current="step" @endif>
             <span class="exercise-status">{{ in_array($item->id, $completedExerciseIds) ? '✓' : $item->position }}</span>
-            <span><strong>{{ $item->title }}</strong><small>{{ $item->difficulty }} · {{ $item->xp }} XP</small></span>
+            <span><strong>{{ $item->title }}</strong><small>{{ $item->difficulty }} · {{ $item->xp }} XP @if($item->is($exercise))<b>· AGORA</b>@endif</small></span>
         </a>
         @endforeach
     </nav>
@@ -103,7 +102,7 @@
         @if(session('execution'))
             @include('partials.exercise-result', ['execution' => session('execution')])
         @elseif(session('validation'))
-            @include('partials.exercise-result', ['validation' => session('validation'), 'nextExercise' => $nextExercise, 'lesson' => $lesson])
+            @include('partials.exercise-result', ['validation' => session('validation'), 'nextStep' => $nextStep, 'lesson' => $lesson])
         @endif
     </div>
 

@@ -16,6 +16,6 @@ class Module extends Model
 
     public function lessons(): HasMany
     {
-        return $this->hasMany(Lesson::class)->orderBy('position');
+        return $this->hasMany(Lesson::class)->where('is_published', true)->orderBy('position');
     }
 }

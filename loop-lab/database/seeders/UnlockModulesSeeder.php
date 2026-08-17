@@ -18,6 +18,6 @@ class UnlockModulesSeeder extends Seeder
             Module::where('slug', $slug)->update(['is_available' => true]);
         }
 
-        echo "\n✓ Módulos liberados: " . implode(', ', $modules) . "\n";
+        echo "\n✓ Módulos liberados: ".implode(', ', $modules)."\n";
     }
 }

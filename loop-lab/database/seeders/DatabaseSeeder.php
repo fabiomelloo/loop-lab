@@ -81,7 +81,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->seedAdditionalModules();
+        $this->call([
+            FundamentalsExpandedSeeder::class,
+            ConditionsExpandedSeeder::class,
+            LoopsExpansionSeeder::class,
+            ArraysAndFunctionsExpandedSeeder::class,
+            StringsExpandedSeeder::class,
+        ]);
         $this->seedCurriculumExpansion();
+        $this->normalizeCurriculum();
     }
 
     private function seedAdditionalModules(): void
@@ -349,5 +357,41 @@ class DatabaseSeeder extends Seeder
         $lesson = Lesson::where('slug', 'loop-for')->firstOrFail();
         $this->exercise($lesson, ['title' => 'Encontre o loop infinito', 'slug' => 'debug-loop-infinito', 'difficulty' => 'Médio', 'type' => 'debug', 'position' => 4, 'xp' => 90, 'description' => 'Corrija o código que diminui $i e nunca alcança o fim.', 'rules' => ['Mantenha o loop for.', 'Altere apenas o necessário.'], 'starter_code' => "<?php\nfor (\$i=1; \$i<=5; \$i--) { echo \$i.PHP_EOL; }", 'solution' => "<?php\nfor (\$i=1; \$i<=5; \$i++) { echo \$i.PHP_EOL; }", 'explanation' => '$i++ aproxima o contador do limite final.', 'required_structure' => 'for', 'hints' => ['Observe a direção do contador.', 'Ele começa em 1 e precisa chegar a 5.', 'Troque -- por ++.'], 'expected' => "1\n2\n3\n4\n5"]);
         $this->exercise($lesson, ['title' => 'Preveja a saída', 'slug' => 'previsao-loop-zero', 'difficulty' => 'Fácil', 'type' => 'prediction', 'options' => ['A' => '1 2 3', 'B' => '0 1 2', 'C' => '0 1 2 3', 'D' => 'Loop infinito'], 'correct_answer' => 'B', 'position' => 5, 'xp' => 40, 'description' => 'Qual é a saída de: for ($i=0; $i<3; $i++) echo $i;', 'rules' => ['Simule cada repetição antes de responder.'], 'starter_code' => 'B', 'solution' => 'B', 'explanation' => 'Começa em 0 e para antes de 3.', 'required_structure' => null, 'hints' => ['O primeiro valor é 0.', '$i < 3 não inclui 3.', 'Os valores são 0, 1 e 2.'], 'expected' => 'B']);
+    }
+
+    private function normalizeCurriculum(): void
+    {
+        Lesson::whereIn('slug', ['switch-e-match', 'foreach-break-continue', 'strings-dividir-juntar'])
+            ->update(['is_published' => false]);
+
+        $paths = [
+            'fundamentos' => ['fundamentos-variaveis', 'tipos-dados-completo', 'operadores-aritmeticos', 'concatenacao-interpolacao', 'constantes', 'operadores-especiais', 'comparacoes-logica'],
+            'condicoes' => ['condicoes-if', 'comparacoes-logica-completa', 'if-elseif-else-avancado', 'ternario-null-coalescing', 'switch-match'],
+            'loops' => ['loop-for', 'loop-while', 'while-do-while', 'loop-foreach', 'break-continue', 'loops-aninhados'],
+            'arrays' => ['arrays-listas', 'arrays-associativos', 'array-metodos-count-in-array', 'array-manipulacao-push-pop-merge'],
+            'funcoes' => ['funcoes-basico', 'funcoes-parametros-padrao', 'funcoes-tipos-retorno', 'funcoes-tipos-escopo', 'funcoes-com-arrays-parameters'],
+            'strings' => ['strings-manipulacao', 'strings-comprimento-caracteres', 'strings-substring-extrair', 'strings-busca-strpos', 'strings-transformacao-case-trim', 'strings-explode-implode', 'strings-substituicao-replace', 'strings-escape-sequences', 'strings-formatacao-repeticao'],
+            'datas' => ['datas-basico', 'datas-operacoes'],
+            'formularios' => ['formularios-post', 'formularios-validacao'],
+            'orientacao-a-objetos' => ['poo-classes-objetos', 'poo-encapsulamento'],
+        ];
+
+        $previous = null;
+        foreach ($paths as $moduleSlug => $slugs) {
+            $module = Module::where('slug', $moduleSlug)->firstOrFail();
+            $position = 1;
+            foreach ($slugs as $slug) {
+                $lesson = Lesson::where('slug', $slug)->where('module_id', $module->id)->first();
+                if (! $lesson) {
+                    continue;
+                }
+                $lesson->update([
+                    'position' => $position++,
+                    'is_published' => true,
+                    'prerequisite_lesson_id' => $previous?->id,
+                ]);
+                $previous = $lesson;
+            }
+        }
     }
 }

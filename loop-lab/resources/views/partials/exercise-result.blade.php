@@ -21,8 +21,11 @@
             <div class="compare"><div><b>Sua saída</b><pre>{{ $validation['output'] ?: '(vazia)' }}</pre></div><div><b>Saída esperada</b><pre>{{ $validation['expected'] }}</pre></div></div>
         @endif
         @if(!empty($validation['diagnostic']))<p><strong>Diagnóstico:</strong> {{ $validation['diagnostic'] }}</p>@endif
-        @if($validation['passed'] && isset($nextExercise) && $nextExercise)
-            <a class="btn btn-primary" data-spa href="{{ route('lessons.show', [$lesson, $nextExercise]) }}#praticar">Ir para o próximo exercício</a>
+        @if($validation['passed'] && isset($nextStep) && $nextStep['exercise'])
+            <div class="next-step"><span class="eyebrow">Próximo passo recomendado</span><h3>{{ $nextStep['kind'] === 'exercise' ? $nextStep['exercise']->title : $nextStep['lesson']->title }}</h3><p>{{ $nextStep['kind'] === 'exercise' ? 'Continue praticando este assunto.' : 'Você concluiu esta aula. Agora avance para o próximo conceito.' }}</p>
+            <a class="btn btn-primary" data-spa href="{{ route('lessons.show', [$nextStep['lesson'], $nextStep['exercise']]) }}#{{ $nextStep['kind'] === 'exercise' ? 'praticar' : 'aprender' }}">{{ $nextStep['kind'] === 'exercise' ? 'Próximo exercício' : 'Começar próxima aula' }}</a></div>
+        @elseif($validation['passed'] && isset($nextStep) && $nextStep['kind'] === 'complete')
+            <p><strong>Você concluiu todo o percurso publicado. Continue pela área Revisar.</strong></p>
         @endif
     </div>
 </section>

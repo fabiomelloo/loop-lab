@@ -89,7 +89,7 @@ class ProgressService
         return DB::table('exercises')
             ->select('lesson_id')
             ->groupBy('lesson_id')
-            ->havingRaw('COUNT(id) = SUM(CASE WHEN id IN (' . implode(',', $completedExerciseIds) . ') THEN 1 ELSE 0 END)')
+            ->havingRaw('COUNT(id) = SUM(CASE WHEN id IN ('.implode(',', $completedExerciseIds).') THEN 1 ELSE 0 END)')
             ->pluck('lesson_id')
             ->all();
     }

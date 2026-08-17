@@ -10,6 +10,42 @@ class ExerciseValidator
 
     public function validate(Exercise $exercise, string $code): array
     {
+        $candidates = $this->submissionCandidates($exercise, $code);
+        $lastResult = null;
+
+        foreach ($candidates as $candidate) {
+            $result = $this->validateCandidate($exercise, $candidate);
+
+            if ($result['passed']) {
+                return $result;
+            }
+
+            $lastResult = $result;
+        }
+
+        return $lastResult ?? ['passed' => false, 'output' => '', 'expected' => '', 'error' => 'Não foi possível validar a resposta.', 'diagnostic' => '', 'milliseconds' => 0];
+    }
+
+    private function submissionCandidates(Exercise $exercise, string $code): array
+    {
+        $candidates = [trim($code)];
+        $starter = trim((string) $exercise->starter_code);
+
+        if ($starter === '' || str_contains($code, '<?php')) {
+            return $candidates;
+        }
+
+        $merged = $starter."\n".$code;
+
+        if (trim($merged) !== trim($code)) {
+            $candidates[] = $merged;
+        }
+
+        return array_values(array_unique($candidates, SORT_STRING));
+    }
+
+    private function validateCandidate(Exercise $exercise, string $code): array
+    {
         if ($exercise->type === 'prediction') {
             $passed = trim($code) === trim((string) $exercise->correct_answer);
 
@@ -48,25 +84,47 @@ class ExerciseValidator
 
     private function usesStructure(string $code, string $structure): bool
     {
+        $tokens = token_get_all($code);
+
         if ($structure === 'bitwise_and') {
-            return collect(token_get_all($code))->contains(
+            return collect($tokens)->contains(
                 fn ($item) => $item === '&' || (is_array($item) && $item[1] === '&')
             );
         }
 
         if ($structure === 'ternary') {
-            $tokens = token_get_all($code);
-
             return in_array('?', $tokens, true) && in_array(':', $tokens, true);
+        }
+
+        if ($structure === 'comparison') {
+            $comparisonTokens = [T_IS_EQUAL, T_IS_IDENTICAL, T_IS_NOT_EQUAL, T_IS_NOT_IDENTICAL, T_IS_SMALLER_OR_EQUAL, T_IS_GREATER_OR_EQUAL];
+
+            return collect($tokens)->contains(fn ($item) => in_array($item, ['<', '>'], true)
+                || (is_array($item) && in_array($item[0], $comparisonTokens, true)));
+        }
+
+        if ($structure === 'cast') {
+            $castTokens = [T_INT_CAST, T_DOUBLE_CAST, T_STRING_CAST, T_ARRAY_CAST, T_OBJECT_CAST, T_BOOL_CAST, T_UNSET_CAST];
+
+            return collect($tokens)->contains(fn ($item) => is_array($item) && in_array($item[0], $castTokens, true));
         }
 
         $token = match ($structure) {
             'for' => T_FOR, 'while' => T_WHILE, 'foreach' => T_FOREACH,
             'if' => T_IF, 'function' => T_FUNCTION, 'class' => T_CLASS,
-            'logical_or' => T_BOOLEAN_OR, default => null,
+            'switch' => T_SWITCH, 'match' => T_MATCH, 'break' => T_BREAK,
+            'continue' => T_CONTINUE, 'const' => T_CONST, 'empty' => T_EMPTY,
+            'null_coalescing' => T_COALESCE, 'logical_or' => T_BOOLEAN_OR,
+            default => null,
         };
 
-        return $token !== null && collect(token_get_all($code))->contains(fn ($item) => is_array($item) && $item[0] === $token);
+        if ($token !== null) {
+            return collect($tokens)->contains(fn ($item) => is_array($item) && $item[0] === $token);
+        }
+
+        return collect($tokens)->contains(fn ($item) => is_array($item)
+            && $item[0] === T_STRING
+            && strcasecmp($item[1], $structure) === 0);
     }
 
     private function normalize(string $output): string

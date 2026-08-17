@@ -9,6 +9,7 @@ use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
+use App\Services\LearningPathService;
 use App\Services\ProgressService;
 use App\Services\RankingService;
 use App\Services\RestrictedPhpRunner;
@@ -31,6 +32,7 @@ class LearningController extends Controller
 
     public function lesson(Lesson $lesson, ?Exercise $exercise = null): View
     {
+        abort_unless($lesson->is_published, 404);
         $lesson->load('exercises.tests');
         $exercise ??= $lesson->exercises->first();
         abort_unless($exercise && $exercise->lesson_id === $lesson->id, 404);
@@ -38,6 +40,7 @@ class LearningController extends Controller
         return view('lesson', $this->navigation() + [
             'stats' => $this->progress->stats(), 'lesson' => $lesson, 'exercise' => $exercise,
             'completedExerciseIds' => $this->progress->completedExerciseIds(),
+            'nextStep' => app(LearningPathService::class)->next($exercise),
         ]);
     }
 
@@ -59,18 +62,18 @@ class LearningController extends Controller
         return back()->withInput()->with('execution', $execution);
     }
 
-    public function validateAnswer(RunCodeRequest $request, Exercise $exercise, ExerciseValidator $validator): RedirectResponse|JsonResponse
+    public function validateAnswer(RunCodeRequest $request, Exercise $exercise, ExerciseValidator $validator, LearningPathService $path): RedirectResponse|JsonResponse
     {
         $result = $validator->validate($exercise->load('tests'), $request->validated('code'));
         $this->progress->recordAttempt($exercise, $request->validated('code'), $result);
 
         if ($request->expectsJson()) {
-            $nextExercise = $exercise->lesson->exercises()->where('position', '>', $exercise->position)->first();
+            $nextStep = $path->next($exercise);
 
             return response()->json([
                 'html' => view('partials.exercise-result', [
                     'validation' => $result,
-                    'nextExercise' => $nextExercise,
+                    'nextStep' => $nextStep,
                     'lesson' => $exercise->lesson,
                 ])->render(),
                 'stats' => $this->progress->stats(),

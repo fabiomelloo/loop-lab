@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Exercise;
+use App\Models\ExerciseTest;
 use App\Models\Lesson;
 use App\Models\Module;
 use Illuminate\Database\Seeder;
@@ -640,8 +641,8 @@ class StringsExpandedSeeder extends Seeder
             'xp' => 80,
             'description' => 'Use sprintf() para formatar 49.9 como "R\$ 49.90" (2 casas decimais).',
             'rules' => ['Use sprintf() com %.2f.', 'Resultado com 2 casas decimais.'],
-            'starter_code' => "<?php\n\n\$preco = 49.9;\n\$formatado = sprintf('R\\$ %.2f', \$preco);\necho \$formatado;\n",
-            'solution' => "<?php\n\n\$preco = 49.9;\n\$formatado = sprintf('R\\$ %.2f', \$preco);\necho \$formatado;",
+            'starter_code' => "<?php\n\n\$preco = 49.9;\n\$formatado = sprintf('R\$ %.2f', \$preco);\necho \$formatado;\n",
+            'solution' => "<?php\n\n\$preco = 49.9;\n\$formatado = sprintf('R\$ %.2f', \$preco);\necho \$formatado;",
             'explanation' => '%.2f formata float com 2 casas decimais: 49.9 vira 49.90.',
             'required_structure' => 'sprintf',
             'hints' => ['%.2f = float com 2 casas.', '49.9 vira 49.90.', 'Resultado: "R\$ 49.90".'],
@@ -668,7 +669,7 @@ class StringsExpandedSeeder extends Seeder
     // Helper para criar exercícios
     private function exercise(Lesson $lesson, array $data): void
     {
-        if (!isset($data['expected'])) {
+        if (! isset($data['expected'])) {
             $data['expected'] = '';
         }
 
@@ -692,7 +693,7 @@ class StringsExpandedSeeder extends Seeder
         // Criar teste (expected output)
         $exerciseId = Exercise::where('slug', $data['slug'])->first()?->id;
         if ($exerciseId) {
-            \App\Models\ExerciseTest::updateOrCreate(
+            ExerciseTest::updateOrCreate(
                 ['exercise_id' => $exerciseId],
                 ['expected_output' => $data['expected']],
             );

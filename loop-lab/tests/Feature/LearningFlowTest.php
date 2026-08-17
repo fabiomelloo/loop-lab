@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\Exercise;
 use App\Models\ExerciseAttempt;
 use App\Models\Learner;
+use App\Models\Lesson;
+use App\Models\Module;
 use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
+use App\Services\LearningPathService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -148,6 +151,15 @@ class LearningFlowTest extends TestCase
             ->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'Resposta correta!'));
     }
 
+    public function test_student_can_submit_only_the_missing_code_when_the_exercise_has_starter_code(): void
+    {
+        $exercise = Exercise::where('slug', 'operador-ou-logico')->firstOrFail();
+
+        $this->postJson(route('exercises.validate', $exercise), ['code' => "echo \$temIngresso || \$ehConvidado ? 'Pode entrar' : 'Não pode entrar';"])
+            ->assertOk()
+            ->assertJsonPath('html', fn ($html) => str_contains($html, 'Resposta correta!'));
+    }
+
     public function test_student_can_register_and_keep_an_identified_learner(): void
     {
         $this->get('/')->assertOk();
@@ -158,5 +170,36 @@ class LearningFlowTest extends TestCase
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas(Learner::class, ['display_name' => 'Aluno Teste']);
+    }
+
+    public function test_published_curriculum_has_continuous_positions_without_duplicate_short_lessons(): void
+    {
+        Module::with('lessons')->get()->each(function (Module $module) {
+            $this->assertSame(range(1, $module->lessons->count()), $module->lessons->pluck('position')->all(), "Ordem inválida em {$module->title}");
+        });
+
+        $this->assertFalse(Lesson::where('slug', 'switch-e-match')->firstOrFail()->is_published);
+        $this->assertFalse(Lesson::where('slug', 'foreach-break-continue')->firstOrFail()->is_published);
+    }
+
+    public function test_editor_supports_tab_shift_tab_and_single_delegated_handler(): void
+    {
+        $response = $this->get('/aulas/loop-for');
+
+        $response->assertOk()
+            ->assertSee("event.key === 'Tab'", false)
+            ->assertSee('event.shiftKey', false)
+            ->assertSee("document.addEventListener('keydown'", false)
+            ->assertDontSee("editor.addEventListener('keydown'", false);
+    }
+
+    public function test_last_exercise_recommends_the_next_lesson(): void
+    {
+        $lesson = Lesson::where('slug', 'fundamentos-variaveis')->firstOrFail();
+        $exercise = $lesson->exercises()->reorder('position', 'desc')->firstOrFail();
+        $result = app(LearningPathService::class)->next($exercise);
+
+        $this->assertSame('lesson', $result['kind']);
+        $this->assertSame('tipos-dados-completo', $result['lesson']->slug);
     }
 }
