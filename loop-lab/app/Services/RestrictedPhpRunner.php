@@ -49,8 +49,9 @@ class RestrictedPhpRunner
             }
 
             $disabled = implode(',', self::BLOCKED_CALLS);
+            $phpBinary = $this->phpBinary();
             $process = new Process([
-                PHP_BINARY, '-n', '-d', 'display_errors=stderr', '-d', 'memory_limit=32M',
+                $phpBinary, '-n', '-d', 'display_errors=stderr', '-d', 'memory_limit=32M',
                 '-d', 'max_execution_time=1', '-d', "open_basedir=$directory", '-d', "disable_functions=$disabled", $file,
             ], $directory, [], null, 2);
 
@@ -77,6 +78,21 @@ class RestrictedPhpRunner
                 @rmdir($directory);
             }
         }
+    }
+
+    private function phpBinary(): string
+    {
+        $configured = getenv('PHP_CLI_BINARY') ?: null;
+        $binaryName = PHP_OS_FAMILY === 'Windows' ? 'php.exe' : 'php';
+        $candidates = array_filter([$configured, PHP_BINDIR.DIRECTORY_SEPARATOR.$binaryName, PHP_BINARY]);
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate) && is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        throw new \RuntimeException('O executável PHP CLI não foi encontrado.');
     }
 
     private function securityError(string $code): ?string
