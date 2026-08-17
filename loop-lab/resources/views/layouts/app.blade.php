@@ -24,7 +24,7 @@
             <div class="module">Laboratório</div><a class="nav-link" href="{{ route('playground') }}">PHP Playground</a>
         </nav>
     </aside>
-    <div class="content"><header class="topbar"><span class="mobile-title">PHP na Prática</span><span>Aprenda escrevendo código</span><div class="hero-actions"><strong data-xp>{{ $stats['xp'] }} XP</strong>@auth<form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-quiet" type="submit">Sair</button></form>@else<a href="{{ route('login') }}">Entrar</a>@endauth</div></header><main class="page">@yield('content')</main></div>
+    <div class="content"><header class="topbar"><span class="mobile-title">PHP na Prática</span><span>Aprenda escrevendo código</span><div class="hero-actions"><strong data-xp>{{ $stats['xp'] }} XP</strong>@auth<form method="POST" action="{{ route('logout', absolute: false) }}">@csrf<button class="btn btn-quiet" type="submit">Sair</button></form>@else<a href="{{ route('login') }}">Entrar</a>@endauth</div></header><main class="page">@yield('content')</main></div>
 </div>
 <aside class="mascot-toast" data-mascot-toast aria-live="polite" aria-atomic="true" aria-hidden="true">
     <img class="mascot-image" data-mascot-image src="/images/mascots/encouragement.webp" width="138" height="138" alt="">

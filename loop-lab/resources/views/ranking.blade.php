@@ -6,7 +6,7 @@
 <section class="card" style="margin:28px 0">
     <div class="course-card" style="margin:0">
         <div><h2>Seu perfil</h2><p>Escolha o nome que aparecerá para os outros estudantes.</p></div>
-        <form class="profile-form" method="POST" action="{{ route('profile.update') }}" data-profile-form>
+        <form class="profile-form" method="POST" action="{{ route('profile.update', absolute: false) }}" data-profile-form>
             @csrf<div><label for="display_name">Nome no ranking</label><input id="display_name" name="display_name" value="{{ old('display_name', $learner->display_name) }}" maxlength="30" required></div>
             <button class="btn btn-primary" type="submit">Salvar nome</button>
         </form>

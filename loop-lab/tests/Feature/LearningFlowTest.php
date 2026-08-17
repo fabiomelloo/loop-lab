@@ -7,6 +7,7 @@ use App\Models\ExerciseAttempt;
 use App\Models\Learner;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\User;
 use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
 use App\Services\LearningPathService;
@@ -49,7 +50,7 @@ class LearningFlowTest extends TestCase
         ])->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'Teste'));
     }
 
-    public function test_render_proxy_generates_https_form_actions(): void
+    public function test_render_proxy_uses_same_origin_form_actions(): void
     {
         $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
 
@@ -57,7 +58,8 @@ class LearningFlowTest extends TestCase
             ->withHeaders(['Host' => 'loop-lab-2.onrender.com', 'X-Forwarded-Proto' => 'https'])
             ->get('/aulas/loop-for')
             ->assertOk()
-            ->assertSee('formaction="https://localhost/exercicios/'.$exercise->id.'/validar"', false);
+            ->assertSee('formaction="/exercicios/'.$exercise->id.'/validar"', false)
+            ->assertDontSee('formaction="http://', false);
     }
 
     public function test_dangerous_functions_are_blocked(): void
@@ -201,6 +203,20 @@ class LearningFlowTest extends TestCase
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas(Learner::class, ['display_name' => 'Aluno Teste']);
+    }
+
+    public function test_student_can_log_out_and_log_back_in(): void
+    {
+        $user = User::factory()->create(['password' => 'senha-segura']);
+
+        $this->post(route('login.submit'), [
+            'email' => $user->email,
+            'password' => 'senha-segura',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->post(route('logout'))->assertRedirect(route('dashboard'));
+        $this->assertGuest();
     }
 
     public function test_published_curriculum_has_continuous_positions_without_duplicate_short_lessons(): void

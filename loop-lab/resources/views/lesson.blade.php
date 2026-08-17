@@ -90,10 +90,10 @@
             @error('code')<p class="feedback bad" role="alert">{{ $message }}</p>@enderror
             <div class="editor-actions">
                 <div class="actions-secondary">
-                    @if($exercise->type !== 'prediction')<button type="submit" class="btn btn-secondary" formaction="{{ route('exercises.run', $exercise) }}">Executar código</button>@endif
+                    @if($exercise->type !== 'prediction')<button type="submit" class="btn btn-secondary" formaction="{{ route('exercises.run', $exercise, absolute: false) }}">Executar código</button>@endif
                     <a class="btn btn-quiet" data-reset-editor href="{{ route('lessons.show', [$lesson, $exercise]) }}#praticar">Resetar</a>
                 </div>
-                <button type="submit" class="btn btn-primary" formaction="{{ route('exercises.validate', $exercise) }}">Validar resposta</button>
+                <button type="submit" class="btn btn-primary" formaction="{{ route('exercises.validate', $exercise, absolute: false) }}">Validar resposta</button>
             </div>
         </form>
     </div>

@@ -70,7 +70,7 @@
         <h1>{{ $mode === 'cadastro' ? 'Criar sua conta' : 'Bem-vindo de volta' }}</h1>
         <p>Salve seu progresso e continue em qualquer dispositivo.</p>
 
-        <form method="POST" action="{{ $mode === 'cadastro' ? route('register') : route('login.submit') }}">
+        <form method="POST" action="{{ $mode === 'cadastro' ? route('register', absolute: false) : route('login.submit', absolute: false) }}">
             @csrf
 
             @if($mode === 'cadastro')
