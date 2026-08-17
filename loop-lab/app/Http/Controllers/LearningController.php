@@ -78,6 +78,7 @@ class LearningController extends Controller
                 ])->render(),
                 'stats' => $this->progress->stats(),
                 'exerciseId' => $exercise->id,
+                'gamification' => ['type' => $result['passed'] ? 'success' : 'error'],
             ]);
         }
 

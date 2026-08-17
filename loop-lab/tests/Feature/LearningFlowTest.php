@@ -76,6 +76,7 @@ class LearningFlowTest extends TestCase
             ->assertOk()
             ->assertJsonPath('stats.completed', 1)
             ->assertJsonPath('stats.xp', 50)
+            ->assertJsonPath('gamification.type', 'success')
             ->assertJsonPath('html', fn ($html) => str_contains($html, 'Resposta correta!'));
     }
 
@@ -132,6 +133,7 @@ class LearningFlowTest extends TestCase
 
         $this->postJson(route('exercises.validate', $exercise), ['code' => '<?php function totalCarrinho($p) { return 60; } echo totalCarrinho([10,20,30]);'])
             ->assertOk()
+            ->assertJsonPath('gamification.type', 'error')
             ->assertJsonPath('html', fn ($html) => str_contains($html, 'valor diferente falhou'));
     }
 
