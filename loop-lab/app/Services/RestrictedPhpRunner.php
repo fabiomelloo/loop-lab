@@ -35,19 +35,26 @@ class RestrictedPhpRunner
             return new CodeExecutionResult(false, '', $error);
         }
 
-        $directory = storage_path('app/sandbox/'.bin2hex(random_bytes(12)));
-        mkdir($directory, 0700, true);
-        $file = $directory.'/solution.php';
-        file_put_contents($file, $code);
-
-        $disabled = implode(',', self::BLOCKED_CALLS);
-        $process = new Process([
-            PHP_BINARY, '-n', '-d', 'display_errors=stderr', '-d', 'memory_limit=32M',
-            '-d', 'max_execution_time=1', '-d', "open_basedir=$directory", '-d', "disable_functions=$disabled", $file,
-        ], $directory, [], null, 2);
-
-        $started = hrtime(true);
+        $directory = null;
+        $file = null;
         try {
+            $directory = sys_get_temp_dir().'/loop-lab-sandbox-'.bin2hex(random_bytes(12));
+            if (! mkdir($directory, 0700, true) && ! is_dir($directory)) {
+                throw new \RuntimeException('Não foi possível criar o ambiente temporário.');
+            }
+
+            $file = $directory.'/solution.php';
+            if (file_put_contents($file, $code) === false) {
+                throw new \RuntimeException('Não foi possível preparar o código para execução.');
+            }
+
+            $disabled = implode(',', self::BLOCKED_CALLS);
+            $process = new Process([
+                PHP_BINARY, '-n', '-d', 'display_errors=stderr', '-d', 'memory_limit=32M',
+                '-d', 'max_execution_time=1', '-d', "open_basedir=$directory", '-d', "disable_functions=$disabled", $file,
+            ], $directory, [], null, 2);
+
+            $started = hrtime(true);
             $process->run();
             $milliseconds = (int) ((hrtime(true) - $started) / 1_000_000);
 
@@ -58,9 +65,17 @@ class RestrictedPhpRunner
             return new CodeExecutionResult(true, $process->getOutput(), '', $milliseconds);
         } catch (ProcessTimedOutException) {
             return new CodeExecutionResult(false, '', 'Tempo excedido. Verifique se você criou um loop infinito.', 2000);
+        } catch (\Throwable $error) {
+            report($error);
+
+            return new CodeExecutionResult(false, '', 'O servidor não conseguiu iniciar o executor PHP. Tente novamente em instantes.');
         } finally {
-            @unlink($file);
-            @rmdir($directory);
+            if ($file) {
+                @unlink($file);
+            }
+            if ($directory) {
+                @rmdir($directory);
+            }
         }
     }
 
