@@ -16,7 +16,7 @@ services:
         value: stderr
       - key: DB_CONNECTION
         value: pgsql
-      - key: DATABASE_URL
+      - key: DB_URL
         fromDatabase:
           name: loop-lab-db
           property: connectionString
