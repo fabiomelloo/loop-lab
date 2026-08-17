@@ -65,7 +65,13 @@ class LearningController extends Controller
     public function validateAnswer(RunCodeRequest $request, Exercise $exercise, ExerciseValidator $validator, LearningPathService $path): RedirectResponse|JsonResponse
     {
         $result = $validator->validate($exercise->load('tests'), $request->validated('code'));
-        $this->progress->recordAttempt($exercise, $request->validated('code'), $result);
+        $progressSaved = true;
+        try {
+            $this->progress->recordAttempt($exercise, $request->validated('code'), $result);
+        } catch (\Throwable $error) {
+            report($error);
+            $progressSaved = false;
+        }
 
         if ($request->expectsJson()) {
             $nextStep = $path->next($exercise);
@@ -76,7 +82,8 @@ class LearningController extends Controller
                     'nextStep' => $nextStep,
                     'lesson' => $exercise->lesson,
                 ])->render(),
-                'stats' => $this->progress->stats(),
+                'stats' => $progressSaved ? $this->progress->stats() : null,
+                'progressWarning' => $progressSaved ? null : 'Seu código foi validado, mas o progresso não pôde ser salvo agora.',
                 'exerciseId' => $exercise->id,
                 'gamification' => ['type' => $result['passed'] ? 'success' : 'error'],
             ]);

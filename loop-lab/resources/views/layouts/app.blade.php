@@ -211,7 +211,14 @@
                 method: 'POST', body: new FormData(form),
                 headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
             });
-            const data = await response.json();
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (error) {
+                console.error('Resposta inesperada do servidor:', responseText);
+                throw new Error(`O servidor respondeu com erro ${response.status}. Atualize a página e tente novamente.`);
+            }
             if (!response.ok) {
                 const message = Object.values(data.errors || {}).flat()[0] || data.message || 'Não foi possível concluir a ação.';
                 document.querySelector('#exercise-result').innerHTML = `<section class="result-card"><div class="feedback bad" role="alert"></div></section>`;
@@ -219,7 +226,20 @@
                 return;
             }
             document.querySelector('#exercise-result').innerHTML = data.html;
-            if (data.gamification?.type) showMascot(data.gamification.type);
+            if (data.progressWarning) {
+                const warning = document.createElement('p');
+                warning.className = 'feedback bad';
+                warning.setAttribute('role', 'alert');
+                warning.textContent = data.progressWarning;
+                document.querySelector('#exercise-result').prepend(warning);
+            }
+            if (data.gamification?.type) {
+                try {
+                    showMascot(data.gamification.type);
+                } catch (error) {
+                    console.error('Não foi possível mostrar o mascote:', error);
+                }
+            }
             document.querySelector('#exercise-result').scrollIntoView({behavior: 'smooth', block: 'nearest'});
             if (data.stats) {
                 document.querySelector('[data-progress-percent]').textContent = `${data.stats.percent}%`;
@@ -230,7 +250,8 @@
                 if (status && data.html.includes('Resposta correta!')) status.textContent = '✓';
             }
         } catch (error) {
-            document.querySelector('#exercise-result').innerHTML = '<section class="result-card"><div class="feedback bad" role="alert">Falha de conexão. Tente novamente.</div></section>';
+            document.querySelector('#exercise-result').innerHTML = '<section class="result-card"><div class="feedback bad" role="alert"></div></section>';
+            document.querySelector('#exercise-result .feedback').textContent = error.message || 'Não foi possível falar com o servidor. Verifique sua conexão e tente novamente.';
         } finally {
             if (button) { button.disabled = false; button.textContent = oldText; }
             setLoading(false);

@@ -10,8 +10,10 @@ use App\Models\Module;
 use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
 use App\Services\LearningPathService;
+use App\Services\ProgressService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 class LearningFlowTest extends TestCase
@@ -77,6 +79,22 @@ class LearningFlowTest extends TestCase
             ->assertJsonPath('stats.completed', 1)
             ->assertJsonPath('stats.xp', 50)
             ->assertJsonPath('gamification.type', 'success')
+            ->assertJsonPath('html', fn ($html) => str_contains($html, 'Resposta correta!'));
+    }
+
+    public function test_validation_result_survives_a_progress_storage_failure(): void
+    {
+        $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
+        $progress = \Mockery::mock(ProgressService::class);
+        $progress->shouldReceive('recordAttempt')->once()->andThrow(new RuntimeException('Banco indisponível'));
+        $this->app->instance(ProgressService::class, $progress);
+
+        $this->postJson(route('exercises.validate', $exercise), [
+            'code' => '<?php for ($i=1; $i<=10; $i++) { echo $i . PHP_EOL; }',
+        ])->assertOk()
+            ->assertJsonPath('gamification.type', 'success')
+            ->assertJsonPath('stats', null)
+            ->assertJsonPath('progressWarning', 'Seu código foi validado, mas o progresso não pôde ser salvo agora.')
             ->assertJsonPath('html', fn ($html) => str_contains($html, 'Resposta correta!'));
     }
 
