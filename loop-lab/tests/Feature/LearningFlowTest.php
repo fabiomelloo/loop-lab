@@ -49,6 +49,17 @@ class LearningFlowTest extends TestCase
         ])->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'Teste'));
     }
 
+    public function test_render_proxy_generates_https_form_actions(): void
+    {
+        $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.10'])
+            ->withHeaders(['Host' => 'loop-lab-2.onrender.com', 'X-Forwarded-Proto' => 'https'])
+            ->get('/aulas/loop-for')
+            ->assertOk()
+            ->assertSee('formaction="https://localhost/exercicios/'.$exercise->id.'/validar"', false);
+    }
+
     public function test_dangerous_functions_are_blocked(): void
     {
         $exercise = Exercise::firstOrFail();
