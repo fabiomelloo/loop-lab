@@ -144,11 +144,23 @@ class LearningController extends Controller
         return back()->with('profile_updated', true);
     }
 
-    public function runPlayground(RunCodeRequest $request, RestrictedPhpRunner $runner): RedirectResponse
+    public function runPlayground(RunCodeRequest $request, RestrictedPhpRunner $runner): RedirectResponse|JsonResponse
     {
         $result = $runner->run($request->validated('code'));
+        $execution = [
+            'successful' => $result->successful,
+            'output' => $result->output,
+            'error' => $result->error,
+            'milliseconds' => $result->milliseconds,
+        ];
 
-        return back()->withInput()->with('execution', (array) $result);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'html' => view('partials.exercise-result', compact('execution'))->render(),
+            ]);
+        }
+
+        return back()->withInput()->with('execution', $execution);
     }
 
     private function navigation(): array

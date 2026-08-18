@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Ranking — PHP na Prática')
 @section('content')
-<span class="eyebrow">Comunidade</span><h1>Ranking de estudantes</h1><p class="lead">A classificação considera XP e exercícios concluídos. Tentativas não dão pontos.</p>
+<span class="eyebrow">Comunidade</span><h1>Ranking de estudantes</h1><p class="lead">A classificação considera XP, exercícios concluídos e atividade recente. Tentativas aparecem para acompanhar quem está praticando.</p>
 
 <section class="card" style="margin:28px 0">
     <div class="course-card" style="margin:0">
@@ -22,6 +22,6 @@
 
 <section class="card" style="padding:0;overflow:hidden"><table class="ranking-table"><thead><tr><th>Posição</th><th>Estudante</th><th>XP</th><th>Concluídos</th><th>Tentativas</th></tr></thead><tbody>
 @forelse($ranking as $entry)<tr class="{{ $entry->learner_key === $learner->learner_key ? 'current' : '' }}"><td class="rank-position">#{{ $entry->position }}</td><td class="rank-name">{{ $entry->display_name }}@if($entry->learner_key === $learner->learner_key)<span class="rank-you">VOCÊ</span>@endif</td><td>{{ $entry->xp }} XP</td><td>{{ $entry->completed }}</td><td>{{ $entry->attempts }}</td></tr>
-@empty<tr><td class="empty-ranking" colspan="5">Conclua seu primeiro exercício para entrar no ranking.</td></tr>@endforelse
+@empty<tr><td class="empty-ranking" colspan="5">Valide seu primeiro exercício para entrar no ranking.</td></tr>@endforelse
 </tbody></table></section>
 @endsection

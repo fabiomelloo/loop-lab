@@ -50,6 +50,14 @@ class LearningFlowTest extends TestCase
         ])->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'Teste'));
     }
 
+    public function test_playground_can_execute_without_a_page_redirect(): void
+    {
+        $this->postJson(route('playground.run'), [
+            'code' => '<?php echo "Playground OK";',
+        ])->assertOk()
+            ->assertJsonPath('html', fn ($html) => str_contains($html, 'Playground OK'));
+    }
+
     public function test_render_proxy_uses_same_origin_form_actions(): void
     {
         $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
@@ -147,6 +155,25 @@ class LearningFlowTest extends TestCase
         UserProgress::create(['learner_key' => '22222222-2222-4222-8222-222222222222', 'exercise_id' => $exercise->id, 'xp' => 120, 'completed_at' => now()]);
 
         $this->get(route('ranking'))->assertOk()->assertSeeInOrder(['Bruno', 'Ana']);
+    }
+
+    public function test_ranking_includes_students_that_are_attempting_exercises(): void
+    {
+        $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
+        Learner::create(['learner_key' => '33333333-3333-4333-8333-333333333333', 'display_name' => 'Caio']);
+        ExerciseAttempt::create([
+            'learner_key' => '33333333-3333-4333-8333-333333333333',
+            'exercise_id' => $exercise->id,
+            'code' => '<?php echo 1;',
+            'output' => '1',
+            'status' => 'failed',
+            'execution_time' => 10,
+        ]);
+
+        $this->get(route('ranking'))
+            ->assertOk()
+            ->assertSee('Caio')
+            ->assertSee('0 XP');
     }
 
     public function test_operator_lesson_contains_the_three_requested_exercises(): void
