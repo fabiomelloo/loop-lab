@@ -56,6 +56,7 @@ class ProgressService
 
     public function stats(): array
     {
+        $this->learner();
         $key = $this->learnerKey();
 
         try {
