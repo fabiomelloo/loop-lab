@@ -20,10 +20,9 @@ class RankingService
                 ->selectRaw('learner_key, COUNT(*) as attempts')
                 ->groupBy('learner_key');
 
-            return Learner::query()
+            $query = Learner::query()
                 ->leftJoinSub($progress, 'progress', 'progress.learner_key', '=', 'learners.learner_key')
                 ->leftJoinSub($attempts, 'attempts', 'attempts.learner_key', '=', 'learners.learner_key')
-                ->whereRaw('COALESCE(progress.completed, 0) > 0 OR COALESCE(attempts.attempts, 0) > 0')
                 ->select('learners.learner_key', 'learners.display_name', 'learners.last_active_at')
                 ->selectRaw('COALESCE(progress.xp, 0) as xp')
                 ->selectRaw('COALESCE(progress.completed, 0) as completed')
@@ -32,14 +31,13 @@ class RankingService
                 ->orderByDesc('completed')
                 ->orderByDesc('attempts')
                 ->orderBy('progress.reached_at')
-                ->limit($limit)
-                ->get()
-                ->values()
-                ->map(function ($learner, $index) {
-                    $learner->position = $index + 1;
+                ->limit($limit);
 
-                    return $learner;
-                });
+            return $query->get()->values()->map(function ($learner, $index) {
+                $learner->position = $index + 1;
+
+                return $learner;
+            });
         } catch (\Throwable $error) {
             report($error);
 

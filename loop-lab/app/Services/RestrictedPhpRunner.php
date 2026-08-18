@@ -84,12 +84,26 @@ class RestrictedPhpRunner
     {
         $configured = getenv('PHP_CLI_BINARY') ?: null;
         $binaryName = PHP_OS_FAMILY === 'Windows' ? 'php.exe' : 'php';
-        $candidates = array_filter([$configured, PHP_BINDIR.DIRECTORY_SEPARATOR.$binaryName, PHP_BINARY]);
+        $pathCandidates = array_filter([
+            $configured,
+            PHP_BINDIR.DIRECTORY_SEPARATOR.$binaryName,
+            PHP_BINARY,
+            '/usr/local/bin/php',
+            '/usr/bin/php',
+            '/usr/bin/php8.3',
+            '/usr/bin/php8.2',
+            '/usr/local/bin/php8.3',
+        ]);
 
-        foreach ($candidates as $candidate) {
-            if (is_file($candidate) && is_executable($candidate)) {
+        foreach ($pathCandidates as $candidate) {
+            if (is_string($candidate) && $candidate !== '' && is_file($candidate) && is_executable($candidate)) {
                 return $candidate;
             }
+        }
+
+        $resolved = trim((string) @shell_exec('command -v php || which php || true'));
+        if ($resolved !== '') {
+            return $resolved;
         }
 
         throw new \RuntimeException('O executável PHP CLI não foi encontrado.');
