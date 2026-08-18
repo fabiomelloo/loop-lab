@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $titles = ['Fundamentos', 'Condições', 'Loops', 'Arrays', 'Funções', 'Strings', 'Datas', 'Formulários', 'Orientação a Objetos'];
+        $titles = ['Fundamentos', 'Condições', 'Loops', 'Arrays', 'Funções', 'Strings', 'Datas', 'Formulários', 'Orientação a Objetos', 'Laravel Eloquent'];
         foreach ($titles as $index => $title) {
             Module::updateOrCreate(
                 ['slug' => str($title)->ascii()->slug()],
@@ -87,6 +87,7 @@ class DatabaseSeeder extends Seeder
             LoopsExpansionSeeder::class,
             ArraysAndFunctionsExpandedSeeder::class,
             StringsExpandedSeeder::class,
+            EloquentSeeder::class,
         ]);
         $this->seedCurriculumExpansion();
         $this->normalizeCurriculum();
@@ -374,6 +375,7 @@ class DatabaseSeeder extends Seeder
             'datas' => ['datas-basico', 'datas-operacoes'],
             'formularios' => ['formularios-post', 'formularios-validacao'],
             'orientacao-a-objetos' => ['poo-classes-objetos', 'poo-encapsulamento'],
+            'laravel-eloquent' => ['eloquent-models-convencoes', 'eloquent-sql-select', 'eloquent-crud', 'eloquent-relacionamentos', 'eloquent-scopes-performance'],
         ];
 
         $previous = null;

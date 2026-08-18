@@ -249,4 +249,25 @@ class LearningFlowTest extends TestCase
         $this->assertSame('lesson', $result['kind']);
         $this->assertSame('tipos-dados-completo', $result['lesson']->slug);
     }
+
+    public function test_eloquent_module_is_available_after_object_orientation(): void
+    {
+        $module = Module::with('lessons.exercises')->where('slug', 'laravel-eloquent')->firstOrFail();
+
+        $this->assertSame('Laravel Eloquent', $module->title);
+        $this->assertSame([
+            'eloquent-models-convencoes',
+            'eloquent-sql-select',
+            'eloquent-crud',
+            'eloquent-relacionamentos',
+            'eloquent-scopes-performance',
+        ], $module->lessons->pluck('slug')->all());
+        $this->assertTrue($module->lessons->every(fn (Lesson $lesson) => $lesson->exercises->count() === 3));
+
+        $lastObjectLesson = Lesson::where('slug', 'poo-encapsulamento')->firstOrFail();
+        $lastObjectExercise = $lastObjectLesson->exercises()->reorder('position', 'desc')->firstOrFail();
+        $result = app(LearningPathService::class)->next($lastObjectExercise);
+
+        $this->assertSame('eloquent-models-convencoes', $result['lesson']->slug);
+    }
 }
