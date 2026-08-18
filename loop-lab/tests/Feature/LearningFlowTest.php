@@ -176,6 +176,34 @@ class LearningFlowTest extends TestCase
             ->assertSee('0 XP');
     }
 
+    public function test_playground_does_not_crash_when_stats_fail(): void
+    {
+        $progress = \Mockery::mock(ProgressService::class);
+        $progress->shouldReceive('stats')->andThrow(new RuntimeException('Banco indisponível'));
+        $this->app->instance(ProgressService::class, $progress);
+
+        $this->get(route('playground'))
+            ->assertOk()
+            ->assertSee('PHP Playground');
+    }
+
+    public function test_ranking_does_not_crash_when_rank_service_fails(): void
+    {
+        $progress = \Mockery::mock(ProgressService::class);
+        $progress->shouldReceive('learner')->andReturn(Learner::make(['learner_key' => 'fallback-key', 'display_name' => 'Aluno de teste']));
+        $progress->shouldReceive('stats')->andReturn(['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0]);
+        $this->app->instance(ProgressService::class, $progress);
+
+        $ranking = \Mockery::mock(\App\Services\RankingService::class);
+        $ranking->shouldReceive('top')->andThrow(new RuntimeException('Ranking indisponível'));
+        $ranking->shouldReceive('currentPosition')->andThrow(new RuntimeException('Ranking indisponível'));
+        $this->app->instance(\App\Services\RankingService::class, $ranking);
+
+        $this->get(route('ranking'))
+            ->assertOk()
+            ->assertSee('Ranking de estudantes');
+    }
+
     public function test_operator_lesson_contains_the_three_requested_exercises(): void
     {
         $this->get('/aulas/operadores-especiais')

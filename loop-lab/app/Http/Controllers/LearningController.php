@@ -94,18 +94,37 @@ class LearningController extends Controller
 
     public function playground(): View
     {
-        return view('playground', $this->navigation() + ['stats' => $this->progress->stats()]);
+        try {
+            $stats = $this->progress->stats();
+        } catch (\Throwable $error) {
+            report($error);
+            $stats = ['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0];
+        }
+
+        return view('playground', $this->navigation() + ['stats' => $stats]);
     }
 
     public function ranking(RankingService $ranking): View
     {
-        $learner = $this->progress->learner();
+        try {
+            $learner = $this->progress->learner();
+            $stats = $this->progress->stats();
+            $entries = $ranking->top();
+            $currentPosition = $ranking->currentPosition($learner->learner_key);
+        } catch (\Throwable $error) {
+            report($error);
+
+            $learner = $this->progress->learner();
+            $stats = ['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0];
+            $entries = collect();
+            $currentPosition = null;
+        }
 
         return view('ranking', $this->navigation() + [
-            'stats' => $this->progress->stats(),
+            'stats' => $stats,
             'learner' => $learner,
-            'ranking' => $ranking->top(),
-            'currentPosition' => $ranking->currentPosition($learner->learner_key),
+            'ranking' => $entries,
+            'currentPosition' => $currentPosition,
         ]);
     }
 

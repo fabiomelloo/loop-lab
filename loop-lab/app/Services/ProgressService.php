@@ -57,16 +57,23 @@ class ProgressService
     public function stats(): array
     {
         $key = $this->learnerKey();
-        $completed = UserProgress::where('learner_key', $key)->count();
-        $total = Exercise::count();
 
-        return [
-            'completed' => $completed,
-            'total' => $total,
-            'percent' => $total ? (int) round($completed / $total * 100) : 0,
-            'xp' => UserProgress::where('learner_key', $key)->sum('xp'),
-            'attempts' => ExerciseAttempt::where('learner_key', $key)->count(),
-        ];
+        try {
+            $completed = UserProgress::where('learner_key', $key)->count();
+            $total = Exercise::count();
+
+            return [
+                'completed' => $completed,
+                'total' => $total,
+                'percent' => $total ? (int) round($completed / $total * 100) : 0,
+                'xp' => UserProgress::where('learner_key', $key)->sum('xp'),
+                'attempts' => ExerciseAttempt::where('learner_key', $key)->count(),
+            ];
+        } catch (\Throwable $error) {
+            report($error);
+
+            return ['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0];
+        }
     }
 
     public function completedExerciseIds(): array
