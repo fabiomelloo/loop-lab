@@ -86,19 +86,21 @@ class ProgressService
 
     public function completedLessonIds(): array
     {
-        $key = $this->learnerKey();
         $completedExerciseIds = $this->completedExerciseIds();
 
         if (empty($completedExerciseIds)) {
             return [];
         }
 
-        // Obter lições que têm TODOS os exercícios completos
-        return DB::table('exercises')
-            ->select('lesson_id')
+        $completedSet = array_flip($completedExerciseIds);
+
+        return Exercise::select('id', 'lesson_id')
+            ->get()
             ->groupBy('lesson_id')
-            ->havingRaw('COUNT(id) = SUM(CASE WHEN id IN ('.implode(',', $completedExerciseIds).') THEN 1 ELSE 0 END)')
-            ->pluck('lesson_id')
+            ->filter(function ($exercises) use ($completedSet) {
+                return $exercises->every(fn ($ex) => isset($completedSet[$ex->id]));
+            })
+            ->keys()
             ->all();
     }
 }
