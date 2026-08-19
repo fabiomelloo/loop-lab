@@ -201,7 +201,7 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         ),
         'Tests\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/tests',
+            0 => __DIR__ . '/../..'.'/loop-lab' . '/tests',
         ),
         'Termwind\\' =>
         array (
@@ -507,12 +507,12 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         ),
         'Database\\Seeders\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/database/seeders',
+            0 => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders',
             1 => __DIR__ . '/..' . '/laravel/pint/database/seeders',
         ),
         'Database\\Factories\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/database/factories',
+            0 => __DIR__ . '/../..'.'/loop-lab' . '/database/factories',
             1 => __DIR__ . '/..' . '/laravel/pint/database/factories',
         ),
         'Cron\\' =>
@@ -533,15 +533,31 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         ),
         'App\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/app',
+            0 => __DIR__ . '/../..'.'/loop-lab' . '/app',
             1 => __DIR__ . '/..' . '/laravel/pint/app',
         ),
     );
 
     public static $classMap = array (
-        'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
-        'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
-        'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..'.'/loop-lab' . '/app/Http/Controllers/AuthController.php',
+        'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..'.'/loop-lab' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\LearningController' => __DIR__ . '/../..'.'/loop-lab' . '/app/Http/Controllers/LearningController.php',
+        'App\\Http\\Requests\\RunCodeRequest' => __DIR__ . '/../..'.'/loop-lab' . '/app/Http/Requests/RunCodeRequest.php',
+        'App\\Models\\Exercise' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/Exercise.php',
+        'App\\Models\\ExerciseAttempt' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/ExerciseAttempt.php',
+        'App\\Models\\ExerciseTest' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/ExerciseTest.php',
+        'App\\Models\\Learner' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/Learner.php',
+        'App\\Models\\Lesson' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/Lesson.php',
+        'App\\Models\\Module' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/Module.php',
+        'App\\Models\\User' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/User.php',
+        'App\\Models\\UserProgress' => __DIR__ . '/../..'.'/loop-lab' . '/app/Models/UserProgress.php',
+        'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..'.'/loop-lab' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\CodeExecutionResult' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/CodeExecutionResult.php',
+        'App\\Services\\ExerciseValidator' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/ExerciseValidator.php',
+        'App\\Services\\LearningPathService' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/LearningPathService.php',
+        'App\\Services\\ProgressService' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/ProgressService.php',
+        'App\\Services\\RankingService' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/RankingService.php',
+        'App\\Services\\RestrictedPhpRunner' => __DIR__ . '/../..'.'/loop-lab' . '/app/Services/RestrictedPhpRunner.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -671,8 +687,15 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         'Cron\\HoursField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/HoursField.php',
         'Cron\\MinutesField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MinutesField.php',
         'Cron\\MonthField' => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron/MonthField.php',
-        'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
-        'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
+        'Database\\Factories\\UserFactory' => __DIR__ . '/../..'.'/loop-lab' . '/database/factories/UserFactory.php',
+        'Database\\Seeders\\ArraysAndFunctionsExpandedSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/ArraysAndFunctionsExpandedSeeder.php',
+        'Database\\Seeders\\ConditionsExpandedSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/ConditionsExpandedSeeder.php',
+        'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/DatabaseSeeder.php',
+        'Database\\Seeders\\EloquentSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/EloquentSeeder.php',
+        'Database\\Seeders\\FundamentalsExpandedSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/FundamentalsExpandedSeeder.php',
+        'Database\\Seeders\\LoopsExpansionSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/LoopsExpansionSeeder.php',
+        'Database\\Seeders\\StringsExpandedSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/StringsExpandedSeeder.php',
+        'Database\\Seeders\\UnlockModulesSeeder' => __DIR__ . '/../..'.'/loop-lab' . '/database/seeders/UnlockModulesSeeder.php',
         'DateError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
         'DateException' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateException.php',
         'DateInvalidOperationException' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateInvalidOperationException.php',
@@ -7225,9 +7248,10 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         'Termwind\\ValueObjects\\Node' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Node.php',
         'Termwind\\ValueObjects\\Style' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Style.php',
         'Termwind\\ValueObjects\\Styles' => __DIR__ . '/..' . '/nunomaduro/termwind/src/ValueObjects/Styles.php',
-        'Tests\\Feature\\ExampleTest' => __DIR__ . '/../..' . '/tests/Feature/ExampleTest.php',
-        'Tests\\TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
-        'Tests\\Unit\\ExampleTest' => __DIR__ . '/../..' . '/tests/Unit/ExampleTest.php',
+        'Tests\\Feature\\LearningFlowTest' => __DIR__ . '/../..'.'/loop-lab' . '/tests/Feature/LearningFlowTest.php',
+        'Tests\\TestCase' => __DIR__ . '/../..'.'/loop-lab' . '/tests/TestCase.php',
+        'Tests\\Unit\\ExampleTest' => __DIR__ . '/../..'.'/loop-lab' . '/tests/Unit/ExampleTest.php',
+        'Tests\\Unit\\RestrictedPhpRunnerTest' => __DIR__ . '/../..'.'/loop-lab' . '/tests/Unit/RestrictedPhpRunnerTest.php',
         'TheSeer\\Tokenizer\\Exception' => __DIR__ . '/..' . '/theseer/tokenizer/src/Exception.php',
         'TheSeer\\Tokenizer\\NamespaceUri' => __DIR__ . '/..' . '/theseer/tokenizer/src/NamespaceUri.php',
         'TheSeer\\Tokenizer\\NamespaceUriException' => __DIR__ . '/..' . '/theseer/tokenizer/src/NamespaceUriException.php',

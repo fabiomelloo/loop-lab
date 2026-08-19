@@ -180,6 +180,7 @@ class LearningFlowTest extends TestCase
     {
         $progress = \Mockery::mock(ProgressService::class);
         $progress->shouldReceive('stats')->andThrow(new RuntimeException('Banco indisponível'));
+        $progress->shouldReceive('completedLessonIds')->andReturn([]);
         $this->app->instance(ProgressService::class, $progress);
 
         $this->get(route('playground'))
@@ -192,6 +193,7 @@ class LearningFlowTest extends TestCase
         $progress = \Mockery::mock(ProgressService::class);
         $progress->shouldReceive('learner')->andReturn(Learner::make(['learner_key' => 'fallback-key', 'display_name' => 'Aluno de teste']));
         $progress->shouldReceive('stats')->andReturn(['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0]);
+        $progress->shouldReceive('completedLessonIds')->andReturn([]);
         $this->app->instance(ProgressService::class, $progress);
 
         $ranking = \Mockery::mock(\App\Services\RankingService::class);
