@@ -38,12 +38,12 @@ class RestrictedPhpRunner
         $directory = null;
         $file = null;
         try {
-            $directory = sys_get_temp_dir().'/loop-lab-sandbox-'.bin2hex(random_bytes(12));
+            $directory = sys_get_temp_dir().DIRECTORY_SEPARATOR.'loop-lab-sandbox-'.bin2hex(random_bytes(12));
             if (! mkdir($directory, 0700, true) && ! is_dir($directory)) {
                 throw new \RuntimeException('Não foi possível criar o ambiente temporário.');
             }
 
-            $file = $directory.'/solution.php';
+            $file = $directory.DIRECTORY_SEPARATOR.'solution.php';
             if (file_put_contents($file, $code) === false) {
                 throw new \RuntimeException('Não foi possível preparar o código para execução.');
             }

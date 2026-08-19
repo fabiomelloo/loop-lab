@@ -21,7 +21,7 @@
             @endforeach
             <div class="module">Seu aprendizado</div><a class="nav-link {{ request()->routeIs('review') ? 'active' : '' }}" href="{{ route('review') }}">Revisar erros</a>
             <div class="module">Comunidade</div><a class="nav-link {{ request()->routeIs('ranking') ? 'active' : '' }}" href="{{ route('ranking') }}">Ranking</a>
-            <div class="module">Laboratório</div><a class="nav-link" href="{{ route('playground') }}">PHP Playground</a>
+            <div class="module">Laboratório</div><a class="nav-link {{ request()->routeIs('playground') ? 'active' : '' }}" href="{{ route('playground') }}">PHP Playground</a>
         </nav>
     </aside>
     <div class="content"><header class="topbar"><span class="mobile-title">PHP na Prática</span><span>Aprenda escrevendo código</span><div class="hero-actions"><strong data-xp>{{ $stats['xp'] }} XP</strong>@auth<form method="POST" action="{{ route('logout', absolute: false) }}">@csrf<button class="btn btn-quiet" type="submit">Sair</button></form>@else<a href="{{ route('login') }}">Entrar</a>@endauth</div></header><main class="page">@yield('content')</main></div>
@@ -124,7 +124,13 @@
             if (!response.ok) throw new Error('Não foi possível abrir esta página.');
             const html = await response.text();
             const page = new DOMParser().parseFromString(html, 'text/html');
-            document.querySelector('.shell').replaceWith(page.querySelector('.shell'));
+            const newShell = page.querySelector('.shell');
+            const currentShell = document.querySelector('.shell');
+            if (!newShell || !currentShell) {
+                location.href = url;
+                return;
+            }
+            currentShell.replaceWith(newShell);
             document.title = page.title;
             if (push) history.pushState({}, '', url);
             const hash = new URL(url, location.href).hash;
