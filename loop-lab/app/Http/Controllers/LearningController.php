@@ -94,14 +94,9 @@ class LearningController extends Controller
 
     public function playground(): View
     {
-        try {
-            $stats = $this->progress->stats();
-        } catch (\Throwable $error) {
-            report($error);
-            $stats = ['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0];
-        }
-
-        return view('playground', $this->navigation() + ['stats' => $stats]);
+        return view('playground', [
+            'studies' => config('playground.studies', []),
+        ]);
     }
 
     public function ranking(RankingService $ranking): View
@@ -176,6 +171,10 @@ class LearningController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'html' => view('partials.exercise-result', compact('execution'))->render(),
+                'successful' => $result->successful,
+                'output' => $result->output,
+                'error' => $result->error,
+                'milliseconds' => $result->milliseconds,
             ]);
         }
 

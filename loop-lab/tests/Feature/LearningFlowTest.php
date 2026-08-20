@@ -12,6 +12,7 @@ use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
 use App\Services\LearningPathService;
 use App\Services\ProgressService;
+use App\Services\RankingService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -176,16 +177,18 @@ class LearningFlowTest extends TestCase
             ->assertSee('0 XP');
     }
 
-    public function test_playground_does_not_crash_when_stats_fail(): void
+    public function test_playground_opens_without_loading_database_progress(): void
     {
         $progress = \Mockery::mock(ProgressService::class);
-        $progress->shouldReceive('stats')->andThrow(new RuntimeException('Banco indisponível'));
-        $progress->shouldReceive('completedLessonIds')->andReturn([]);
+        $progress->shouldNotReceive('stats');
+        $progress->shouldNotReceive('completedLessonIds');
         $this->app->instance(ProgressService::class, $progress);
 
         $this->get(route('playground'))
             ->assertOk()
-            ->assertSee('PHP Playground');
+            ->assertSee('Aprenda PHP testando ideias')
+            ->assertSee('Repetição com for')
+            ->assertSee('Repetição com while');
     }
 
     public function test_playground_ignores_malformed_execution_session_data(): void
@@ -193,7 +196,7 @@ class LearningFlowTest extends TestCase
         $this->withSession(['execution' => 'dados-antigos'])
             ->get(route('playground'))
             ->assertOk()
-            ->assertSee('PHP Playground');
+            ->assertSee('Laboratório de estudo PHP');
     }
 
     public function test_playground_ignores_incomplete_execution_session_data(): void
@@ -201,7 +204,17 @@ class LearningFlowTest extends TestCase
         $this->withSession(['execution' => ['output' => '']])
             ->get(route('playground'))
             ->assertOk()
-            ->assertSee('PHP Playground');
+            ->assertSee('Laboratório de estudo PHP');
+    }
+
+    public function test_playground_execution_returns_structured_status(): void
+    {
+        $this->postJson(route('playground.run'), ['code' => '<?php echo "Estruturado";'])
+            ->assertOk()
+            ->assertJsonPath('successful', true)
+            ->assertJsonPath('output', 'Estruturado')
+            ->assertJsonPath('error', '')
+            ->assertJsonStructure(['html', 'milliseconds']);
     }
 
     public function test_ranking_does_not_crash_when_rank_service_fails(): void
@@ -212,10 +225,10 @@ class LearningFlowTest extends TestCase
         $progress->shouldReceive('completedLessonIds')->andReturn([]);
         $this->app->instance(ProgressService::class, $progress);
 
-        $ranking = \Mockery::mock(\App\Services\RankingService::class);
+        $ranking = \Mockery::mock(RankingService::class);
         $ranking->shouldReceive('top')->andThrow(new RuntimeException('Ranking indisponível'));
         $ranking->shouldReceive('currentPosition')->andThrow(new RuntimeException('Ranking indisponível'));
-        $this->app->instance(\App\Services\RankingService::class, $ranking);
+        $this->app->instance(RankingService::class, $ranking);
 
         $this->get(route('ranking'))
             ->assertOk()
@@ -344,5 +357,3 @@ class LearningFlowTest extends TestCase
         $this->assertSame('eloquent-models-convencoes', $result['lesson']->slug);
     }
 }
-
-
