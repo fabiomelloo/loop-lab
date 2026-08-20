@@ -11,5 +11,5 @@
         <button class="btn btn-secondary btn-quiet" type="button" data-reset-editor>Restaurar código padrão</button>
     </div>
 </form>
-<div id="exercise-result">@if(session('execution'))@include('partials.exercise-result', ['execution' => session('execution')])@endif</div>
+<div id="exercise-result">@if(is_array(session('execution')))@include('partials.exercise-result', ['execution' => session('execution')])@endif</div>
 @endsection
