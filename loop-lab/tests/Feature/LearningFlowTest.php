@@ -196,6 +196,14 @@ class LearningFlowTest extends TestCase
             ->assertSee('PHP Playground');
     }
 
+    public function test_playground_ignores_incomplete_execution_session_data(): void
+    {
+        $this->withSession(['execution' => ['output' => '']])
+            ->get(route('playground'))
+            ->assertOk()
+            ->assertSee('PHP Playground');
+    }
+
     public function test_ranking_does_not_crash_when_rank_service_fails(): void
     {
         $progress = \Mockery::mock(ProgressService::class);
@@ -336,3 +344,5 @@ class LearningFlowTest extends TestCase
         $this->assertSame('eloquent-models-convencoes', $result['lesson']->slug);
     }
 }
+
+
