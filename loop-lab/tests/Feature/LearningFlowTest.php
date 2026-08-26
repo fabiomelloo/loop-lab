@@ -7,6 +7,8 @@ use App\Models\ExerciseAttempt;
 use App\Models\Learner;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\RewardItem;
+use App\Models\RewardRedemption;
 use App\Models\User;
 use App\Models\UserProgress;
 use App\Services\ExerciseValidator;
@@ -49,14 +51,6 @@ class LearningFlowTest extends TestCase
         $this->postJson(route('exercises.run', $exercise), [
             'code' => '<?php echo "Teste";',
         ])->assertOk()->assertJsonPath('html', fn ($html) => str_contains($html, 'Teste'));
-    }
-
-    public function test_playground_can_execute_without_a_page_redirect(): void
-    {
-        $this->postJson(route('playground.run'), [
-            'code' => '<?php echo "Playground OK";',
-        ])->assertOk()
-            ->assertJsonPath('html', fn ($html) => str_contains($html, 'Playground OK'));
     }
 
     public function test_render_proxy_uses_same_origin_form_actions(): void
@@ -177,44 +171,56 @@ class LearningFlowTest extends TestCase
             ->assertSee('0 XP');
     }
 
-    public function test_playground_opens_without_loading_database_progress(): void
+    public function test_rewards_dashboard_shows_balance_and_catalog(): void
     {
-        $progress = \Mockery::mock(ProgressService::class);
-        $progress->shouldNotReceive('stats');
-        $progress->shouldNotReceive('completedLessonIds');
-        $this->app->instance(ProgressService::class, $progress);
-
-        $this->get(route('playground'))
+        $this->get(route('rewards.index'))
             ->assertOk()
-            ->assertSee('Aprenda PHP testando ideias')
-            ->assertSee('Repetição com for')
-            ->assertSee('Repetição com while');
+            ->assertSee('Troque seu XP por recompensas')
+            ->assertSee('Insígnia Primeiro Passo');
     }
 
-    public function test_playground_ignores_malformed_execution_session_data(): void
+    public function test_student_can_redeem_a_reward_without_page_reload(): void
     {
-        $this->withSession(['execution' => 'dados-antigos'])
-            ->get(route('playground'))
+        $learnerKey = '44444444-4444-4444-8444-444444444444';
+        $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
+        $reward = RewardItem::where('slug', 'insignia-primeiro-passo')->firstOrFail();
+        UserProgress::create(['learner_key' => $learnerKey, 'exercise_id' => $exercise->id, 'xp' => 50, 'completed_at' => now()]);
+
+        $this->withSession(['learner_key' => $learnerKey])
+            ->postJson(route('rewards.redeem', $reward))
             ->assertOk()
-            ->assertSee('Laboratório de estudo PHP');
+            ->assertJsonPath('rewardId', $reward->id)
+            ->assertJsonPath('summary.available', 0)
+            ->assertJsonPath('summary.redeemed', 1);
+
+        $this->assertDatabaseHas(RewardRedemption::class, [
+            'learner_key' => $learnerKey,
+            'reward_item_id' => $reward->id,
+            'points_spent' => 50,
+        ]);
     }
 
-    public function test_playground_ignores_incomplete_execution_session_data(): void
+    public function test_reward_cannot_be_redeemed_without_enough_xp(): void
     {
-        $this->withSession(['execution' => ['output' => '']])
-            ->get(route('playground'))
-            ->assertOk()
-            ->assertSee('Laboratório de estudo PHP');
+        $reward = RewardItem::where('slug', 'certificado-trilha-php')->firstOrFail();
+
+        $this->withSession(['learner_key' => '55555555-5555-4555-8555-555555555555'])
+            ->postJson(route('rewards.redeem', $reward))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reward');
     }
 
-    public function test_playground_execution_returns_structured_status(): void
+    public function test_same_reward_cannot_be_redeemed_twice(): void
     {
-        $this->postJson(route('playground.run'), ['code' => '<?php echo "Estruturado";'])
-            ->assertOk()
-            ->assertJsonPath('successful', true)
-            ->assertJsonPath('output', 'Estruturado')
-            ->assertJsonPath('error', '')
-            ->assertJsonStructure(['html', 'milliseconds']);
+        $learnerKey = '66666666-6666-4666-8666-666666666666';
+        $exercise = Exercise::where('slug', 'for-1-a-10')->firstOrFail();
+        $reward = RewardItem::where('slug', 'insignia-primeiro-passo')->firstOrFail();
+        UserProgress::create(['learner_key' => $learnerKey, 'exercise_id' => $exercise->id, 'xp' => 50, 'completed_at' => now()]);
+
+        $this->withSession(['learner_key' => $learnerKey])->postJson(route('rewards.redeem', $reward))->assertOk();
+        $this->withSession(['learner_key' => $learnerKey])->postJson(route('rewards.redeem', $reward))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('reward');
     }
 
     public function test_ranking_does_not_crash_when_rank_service_fails(): void

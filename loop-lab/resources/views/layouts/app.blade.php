@@ -11,6 +11,9 @@
         .mascot-toast{--mascot-accent:#2563eb;position:fixed;right:24px;bottom:24px;z-index:1000;display:grid;grid-template-columns:138px minmax(210px,300px);align-items:center;gap:6px;width:min(470px,calc(100vw - 32px));padding:16px 18px 16px 8px;border:2px solid color-mix(in srgb,var(--mascot-accent) 32%,white);border-radius:28px;background:rgba(255,255,255,.96);box-shadow:0 24px 70px rgba(8,22,46,.24),inset 0 -4px 0 rgba(15,23,42,.06);backdrop-filter:blur(12px);transform:translateY(28px) scale(.94);opacity:0;visibility:hidden;pointer-events:none}.mascot-toast.visible{animation:mascot-enter .38s cubic-bezier(.2,.9,.25,1.2) forwards;visibility:visible;pointer-events:auto}.mascot-toast.leaving{animation:mascot-exit .2s ease-in forwards}.mascot-toast.error{--mascot-accent:#dc2626}.mascot-toast.success{--mascot-accent:#2563eb}.mascot-image{display:block;width:138px;height:138px;object-fit:contain;filter:drop-shadow(0 10px 12px rgba(15,23,42,.2));transform-origin:bottom center}.mascot-toast.visible .mascot-image{animation:mascot-react .55s .12s cubic-bezier(.2,.8,.2,1) both}.mascot-copy{min-width:0;padding-right:10px}.mascot-label{display:block;margin-bottom:3px;color:var(--mascot-accent);font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.mascot-title{margin:0 0 4px;font-size:22px;line-height:1.15}.mascot-message{margin:0;color:var(--muted);font-size:15px;line-height:1.45}.mascot-controls{position:absolute;top:10px;right:10px;display:flex;gap:4px}.mascot-icon-btn{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:#475569;cursor:pointer}.mascot-icon-btn:hover{background:#eef2f7;color:var(--text)}.mascot-icon-btn:focus-visible{outline:3px solid #93c5fd;outline-offset:1px}.mascot-icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}@keyframes mascot-enter{to{opacity:1;transform:translateY(0) scale(1)}}@keyframes mascot-exit{to{opacity:0;transform:translateY(16px) scale(.97)}}@keyframes mascot-react{0%{transform:scale(.82) rotate(-4deg)}55%{transform:scale(1.08) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
         @media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid rgba(255,255,255,.06)}.topbar{padding:0 20px}.mobile-title{display:block}.page{width:min(100% - 28px,720px)}.grid,.learning-grid,.exercise-workspace,.help-card{grid-template-columns:1fr}.exercise-list{grid-template-columns:1fr}.exercise-brief{border-right:0;border-bottom:1px solid var(--line)}.course-card{align-items:flex-start;flex-direction:column}}@media(max-width:560px){.page-jump{width:100%}.page-jump a{flex:1;text-align:center}.editor-actions{align-items:stretch;flex-direction:column-reverse}.actions-secondary{display:grid;grid-template-columns:1fr 1fr}.editor-actions>.btn{width:100%}.compare{grid-template-columns:1fr}.editor{min-height:320px}.section-heading{align-items:flex-start}.mascot-toast{right:16px;bottom:16px;grid-template-columns:104px 1fr;padding:12px 12px 12px 4px;border-radius:22px}.mascot-image{width:104px;height:116px}.mascot-title{font-size:18px}.mascot-message{font-size:14px}.mascot-controls{top:4px;right:4px}.mascot-copy{padding:34px 4px 0 0}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.mascot-toast.visible,.mascot-toast.leaving,.mascot-toast.visible .mascot-image{animation:none!important}.mascot-toast.visible{opacity:1;transform:none}.mascot-toast.leaving{opacity:0}}
     </style>
+    <style>
+        .reward-hero{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:stretch;margin-bottom:24px}.reward-balance{display:flex;flex-direction:column;justify-content:center;padding:24px;border-radius:24px;background:linear-gradient(145deg,#1d4ed8,#2563eb 55%,#4f46e5);color:#fff;box-shadow:0 18px 40px rgba(37,99,235,.24)}.reward-balance span{font-weight:800}.reward-balance strong{font-size:38px;line-height:1.15;margin:6px 0}.reward-balance small{color:#dbeafe}.reward-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0 42px}.reward-stat{padding:20px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(20,38,70,.05)}.reward-stat span,.reward-stat small{display:block;color:var(--muted)}.reward-stat strong{display:block;font-size:30px;margin:3px 0}.reward-section-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:20px}.reward-section-heading h2{margin-bottom:0}.reward-section-heading p{max-width:440px;margin:0;color:var(--muted)}.reward-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.reward-card{--reward-accent:#2563eb;display:flex;flex-direction:column;gap:16px;min-width:0;padding:22px;border:1px solid var(--line);border-top:4px solid var(--reward-accent);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(20,38,70,.07);transition:transform .2s ease,box-shadow .2s ease}.reward-card:hover{transform:translateY(-3px);box-shadow:0 18px 38px rgba(20,38,70,.12)}.reward-card.redeemed{background:#f8fafc;border-color:#cbd5e1}.reward-blue{--reward-accent:#2563eb}.reward-cyan{--reward-accent:#0891b2}.reward-orange{--reward-accent:#ea580c}.reward-pink{--reward-accent:#db2777}.reward-violet{--reward-accent:#7c3aed}.reward-gold{--reward-accent:#ca8a04}.reward-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:color-mix(in srgb,var(--reward-accent) 12%,white);color:var(--reward-accent)}.reward-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}.reward-card-copy{flex:1}.reward-category{color:var(--reward-accent);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.reward-card h3{font-size:20px;line-height:1.25;margin:4px 0 8px}.reward-card p{margin:0;color:var(--muted)}.reward-cost-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.reward-cost-row strong{font-size:19px}.reward-cost-row span{color:var(--muted);font-size:12px;font-weight:800;text-align:right}.reward-progress{height:8px;border-radius:99px;background:#e5eaf2;overflow:hidden}.reward-progress span{display:block;height:100%;border-radius:inherit;background:var(--reward-accent)}.reward-button{width:100%}.reward-button:disabled{cursor:not-allowed;opacity:.6}.reward-history{margin-top:46px;padding:24px;border:1px solid var(--line);border-radius:20px;background:#fff}.reward-history-list{display:grid;gap:10px}.reward-history-list article{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid var(--line)}.reward-history-list article div span{display:block;color:var(--muted);font-size:13px}.reward-history-list code{padding:6px 10px;border-radius:8px;background:#eef2ff;color:#3730a3;font-weight:900}.reward-toast{margin:0 0 20px}.reward-toast strong{display:block;font-size:18px}@media(max-width:980px){.reward-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:720px){.reward-hero{grid-template-columns:1fr}.reward-stats,.reward-grid{grid-template-columns:1fr}.reward-section-heading{align-items:flex-start;flex-direction:column}.reward-history-list article{align-items:flex-start;flex-direction:column}}@media(prefers-reduced-motion:reduce){.reward-card{transition:none}.reward-card:hover{transform:none}}
+    </style>
 </head>
 <body><div class="ajax-loader" aria-hidden="true"></div><div class="shell">
     <aside class="sidebar"><div class="brand"><span>&lt;?php</span> na Prática</div>
@@ -31,7 +34,7 @@
                     </div>
                 </details>
             @endforeach
-            <section class="sidebar-section"><p class="sidebar-heading">Ferramentas</p><a class="nav-link {{ request()->routeIs('review') ? 'active' : '' }}" href="{{ route('review') }}"><span>Revisar erros</span><span class="nav-status">↺</span></a><a class="nav-link {{ request()->routeIs('ranking') ? 'active' : '' }}" href="{{ route('ranking') }}"><span>Ranking</span><span class="nav-status">★</span></a><a class="nav-link {{ request()->routeIs('playground') ? 'active' : '' }}" href="{{ route('playground') }}"><span>PHP Playground</span><span class="nav-status">⌘</span></a></section>
+            <section class="sidebar-section"><p class="sidebar-heading">Conquistas</p><a class="nav-link {{ request()->routeIs('rewards.*') ? 'active' : '' }}" href="{{ route('rewards.index') }}"><span>Recompensas</span><span class="nav-status">◆</span></a><a class="nav-link {{ request()->routeIs('ranking') ? 'active' : '' }}" href="{{ route('ranking') }}"><span>Ranking</span><span class="nav-status">★</span></a><a class="nav-link {{ request()->routeIs('review') ? 'active' : '' }}" href="{{ route('review') }}"><span>Revisar erros</span><span class="nav-status">↺</span></a></section>
         </nav>
     </aside>
     <div class="content"><header class="topbar"><span class="mobile-title">PHP na Prática</span><span>Aprenda escrevendo código</span><div class="hero-actions"><strong data-xp>{{ $stats['xp'] }} XP</strong>@auth<form method="POST" action="{{ route('logout', absolute: false) }}">@csrf<button class="btn btn-quiet" type="submit">Sair</button></form>@else<a href="{{ route('login') }}">Entrar</a>@endauth</div></header><main class="page">@yield('content')</main></div>
@@ -186,6 +189,68 @@
     });
 
     document.addEventListener('submit', async (event) => {
+        const rewardForm = event.target.closest('[data-reward-form]');
+        if (rewardForm) {
+            event.preventDefault();
+            const button = event.submitter;
+            const rewardTitle = rewardForm.closest('[data-reward-card]')?.querySelector('h3')?.textContent || 'esta recompensa';
+            if (! window.confirm(`Resgatar ${rewardTitle}? O custo será descontado do seu saldo disponível.`)) return;
+            const oldText = button.textContent;
+            const feedback = document.querySelector('#reward-feedback');
+            button.disabled = true;
+            button.textContent = 'Resgatando...';
+            setLoading(true);
+            try {
+                const response = await fetch(rewardForm.action, {method: 'POST', body: new FormData(rewardForm), headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}});
+                const data = await response.json();
+                if (!response.ok) throw new Error(Object.values(data.errors || {}).flat()[0] || data.message || 'Não foi possível resgatar.');
+                feedback.innerHTML = '<div class="feedback ok reward-toast" role="status"><strong></strong><span></span></div>';
+                feedback.querySelector('strong').textContent = data.message;
+                feedback.querySelector('span').textContent = `Código da conquista: ${data.code}`;
+                document.querySelector('[data-reward-available]').textContent = data.summary.available;
+                document.querySelector('[data-reward-spent]').textContent = data.summary.spent;
+                document.querySelector('[data-reward-count]').textContent = data.summary.redeemed;
+                const card = document.querySelector(`[data-reward-card="${data.rewardId}"]`);
+                card?.classList.add('redeemed');
+                card?.setAttribute('data-redeemed', 'true');
+                button.textContent = 'Resgatada';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
+                document.querySelectorAll('[data-reward-card]').forEach(rewardCard => {
+                    if (rewardCard.dataset.redeemed === 'true') return;
+                    const rewardButton = rewardCard.querySelector('.reward-button');
+                    if (Number(rewardCard.dataset.rewardCost) > Number(data.summary.available)) {
+                        rewardButton.disabled = true;
+                        rewardButton.textContent = 'Saldo insuficiente';
+                        rewardButton.classList.remove('btn-primary');
+                        rewardButton.classList.add('btn-secondary');
+                    }
+                });
+                const history = document.querySelector('[data-reward-history]');
+                history.querySelector('.empty-ranking')?.remove();
+                const historyItem = document.createElement('article');
+                const historyCopy = document.createElement('div');
+                const historyTitle = document.createElement('strong');
+                const historyDate = document.createElement('span');
+                const historyCode = document.createElement('code');
+                historyTitle.textContent = data.rewardTitle;
+                historyDate.textContent = data.redeemedAt;
+                historyCode.textContent = data.code;
+                historyCopy.append(historyTitle, historyDate);
+                historyItem.append(historyCopy, historyCode);
+                history.prepend(historyItem);
+                feedback.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            } catch (error) {
+                feedback.innerHTML = '<p class="feedback bad reward-toast" role="alert"></p>';
+                feedback.querySelector('p').textContent = error.message || 'Falha de conexão. Tente novamente.';
+                button.disabled = false;
+                button.textContent = oldText;
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
         const profileForm = event.target.closest('[data-profile-form]');
         if (profileForm) {
             event.preventDefault();

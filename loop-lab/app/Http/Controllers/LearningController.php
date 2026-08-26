@@ -92,13 +92,6 @@ class LearningController extends Controller
         return back()->withInput()->with('validation', $result);
     }
 
-    public function playground(): View
-    {
-        return view('playground', [
-            'studies' => config('playground.studies', []),
-        ]);
-    }
-
     public function ranking(RankingService $ranking): View
     {
         try {
@@ -156,29 +149,6 @@ class LearningController extends Controller
         }
 
         return back()->with('profile_updated', true);
-    }
-
-    public function runPlayground(RunCodeRequest $request, RestrictedPhpRunner $runner): RedirectResponse|JsonResponse
-    {
-        $result = $runner->run($request->validated('code'));
-        $execution = [
-            'successful' => $result->successful,
-            'output' => $result->output,
-            'error' => $result->error,
-            'milliseconds' => $result->milliseconds,
-        ];
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'html' => view('partials.exercise-result', compact('execution'))->render(),
-                'successful' => $result->successful,
-                'output' => $result->output,
-                'error' => $result->error,
-                'milliseconds' => $result->milliseconds,
-            ]);
-        }
-
-        return back()->withInput()->with('execution', $execution);
     }
 
     private function navigation(): array

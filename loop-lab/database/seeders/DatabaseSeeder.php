@@ -5,12 +5,15 @@ namespace Database\Seeders;
 use App\Models\Exercise;
 use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\RewardItem;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->seedRewards();
+
         $titles = ['Fundamentos', 'Condições', 'Loops', 'Arrays', 'Funções', 'Strings', 'Datas', 'Formulários', 'Orientação a Objetos', 'Laravel Eloquent'];
         foreach ($titles as $index => $title) {
             Module::updateOrCreate(
@@ -91,6 +94,22 @@ class DatabaseSeeder extends Seeder
         ]);
         $this->seedCurriculumExpansion();
         $this->normalizeCurriculum();
+    }
+
+    private function seedRewards(): void
+    {
+        $rewards = [
+            ['slug' => 'insignia-primeiro-passo', 'title' => 'Insígnia Primeiro Passo', 'description' => 'Mostre no seu perfil que você começou a trilha e concluiu seus primeiros desafios.', 'category' => 'Insígnia', 'cost' => 50, 'accent' => 'blue'],
+            ['slug' => 'tema-azul-profundo', 'title' => 'Tema Azul Profundo', 'description' => 'Desbloqueie um visual especial inspirado em editores de código.', 'category' => 'Tema', 'cost' => 100, 'accent' => 'cyan'],
+            ['slug' => 'titulo-cacador-bugs', 'title' => 'Título Caçador de Bugs', 'description' => 'Adicione um título especial ao seu perfil de estudante.', 'category' => 'Título', 'cost' => 180, 'accent' => 'orange'],
+            ['slug' => 'avatar-loop-master', 'title' => 'Avatar Loop Master', 'description' => 'Libere uma identidade visual exclusiva para quem domina repetições.', 'category' => 'Avatar', 'cost' => 250, 'accent' => 'pink'],
+            ['slug' => 'insignia-eloquent', 'title' => 'Insígnia Eloquent', 'description' => 'Celebre sua evolução em consultas, models e relacionamentos Laravel.', 'category' => 'Insígnia', 'cost' => 350, 'accent' => 'violet'],
+            ['slug' => 'certificado-trilha-php', 'title' => 'Certificado da Trilha PHP', 'description' => 'Resgate o reconhecimento final da sua jornada de fundamentos em PHP.', 'category' => 'Certificado', 'cost' => 500, 'accent' => 'gold'],
+        ];
+
+        foreach ($rewards as $reward) {
+            RewardItem::updateOrCreate(['slug' => $reward['slug']], $reward + ['is_active' => true]);
+        }
     }
 
     private function seedAdditionalModules(): void

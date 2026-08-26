@@ -13,7 +13,7 @@ MVP de uma plataforma educacional em Laravel para aprender PHP escrevendo códig
 - testes visíveis e ocultos;
 - três níveis de dica e solução sob demanda;
 - registro persistente de tentativas e exercícios concluídos;
-- PHP Playground restrito.
+- Dashboard de recompensas com resgate por XP.
 
 ## Executar localmente
 
