@@ -22,11 +22,40 @@ class LearningController extends Controller
 {
     public function __construct(private readonly ProgressService $progress) {}
 
-    public function dashboard(): View
+    public function dashboard(RankingService $ranking): View
     {
+        $stats = $this->progress->stats();
+        $learner = $this->progress->learner();
+        $completedExerciseIds = $this->progress->completedExerciseIds();
+        $nextExercise = Exercise::with('lesson.module')
+            ->when($completedExerciseIds, fn ($query) => $query->whereNotIn('id', $completedExerciseIds))
+            ->get()
+            ->sortBy(fn ($exercise) => sprintf('%04d-%04d-%04d', $exercise->lesson->module->position, $exercise->lesson->position, $exercise->position))
+            ->first();
+        $nextExercise ??= Exercise::with('lesson.module')->firstOrFail();
+        $rankingPreview = $ranking->top(3);
+        $level = intdiv((int) $stats['xp'], 500) + 1;
+        $levelXp = (int) $stats['xp'] % 500;
+        $todayAttempts = ExerciseAttempt::where('learner_key', $learner->learner_key)->whereDate('created_at', today())->count();
+        $failedToReview = ExerciseAttempt::where('learner_key', $learner->learner_key)
+            ->where('status', 'failed')
+            ->whereNotIn('exercise_id', $completedExerciseIds)
+            ->distinct('exercise_id')
+            ->count('exercise_id');
+
         return view('dashboard', $this->navigation() + [
-            'stats' => $this->progress->stats(),
-            'lesson' => Lesson::with('exercises')->where('slug', 'loop-for')->firstOrFail(),
+            'stats' => $stats,
+            'learner' => $learner,
+            'lesson' => $nextExercise->lesson,
+            'nextExercise' => $nextExercise,
+            'rankingPreview' => $rankingPreview,
+            'currentPosition' => $ranking->currentPosition($learner->learner_key),
+            'streak' => $this->progress->activityStreak(),
+            'level' => $level,
+            'levelXp' => $levelXp,
+            'levelPercent' => (int) round($levelXp / 500 * 100),
+            'todayAttempts' => $todayAttempts,
+            'failedToReview' => $failedToReview,
         ]);
     }
 

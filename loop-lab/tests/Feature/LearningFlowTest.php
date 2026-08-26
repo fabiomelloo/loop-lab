@@ -17,6 +17,7 @@ use App\Services\ProgressService;
 use App\Services\RankingService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -32,8 +33,35 @@ class LearningFlowTest extends TestCase
 
     public function test_dashboard_and_lesson_are_available_in_portuguese(): void
     {
-        $this->get('/')->assertOk()->assertSee('Continue aprendendo');
+        $this->get('/')->assertOk()->assertSee('Continue aprendendo')->assertSee('Missões de hoje')->assertSee('Ranking geral');
         $this->get('/aulas/loop-for')->assertOk()->assertSee('Praticar com exercícios')->assertSee('Contagem de 1 a 10');
+    }
+
+    public function test_dashboard_streak_uses_real_activity_days(): void
+    {
+        $learnerKey = '77777777-7777-4777-8777-777777777777';
+        $exercise = Exercise::firstOrFail();
+
+        foreach ([now()->subDay(), now()] as $activityDate) {
+            $attempt = ExerciseAttempt::create([
+                'learner_key' => $learnerKey,
+                'exercise_id' => $exercise->id,
+                'code' => '<?php echo 1;',
+                'output' => '1',
+                'status' => 'failed',
+                'execution_time' => 10,
+            ]);
+            DB::table('exercise_attempts')->where('id', $attempt->id)->update([
+                'created_at' => $activityDate,
+                'updated_at' => $activityDate,
+            ]);
+        }
+
+        $this->withSession(['learner_key' => $learnerKey])
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertViewHas('streak', 2)
+            ->assertSee('dias de sequência');
     }
 
     public function test_student_can_execute_php_code(): void

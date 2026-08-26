@@ -6,7 +6,7 @@ use App\Models\Exercise;
 use App\Models\ExerciseAttempt;
 use App\Models\Learner;
 use App\Models\UserProgress;
-use Illuminate\Support\Facades\DB;
+use Carbon\CarbonImmutable;
 
 class ProgressService
 {
@@ -75,6 +75,33 @@ class ProgressService
 
             return ['completed' => 0, 'total' => 0, 'percent' => 0, 'xp' => 0, 'attempts' => 0];
         }
+    }
+
+    public function activityStreak(): int
+    {
+        $activityDays = ExerciseAttempt::where('learner_key', $this->learnerKey())
+            ->latest('created_at')
+            ->pluck('created_at')
+            ->map(fn ($date) => CarbonImmutable::parse($date)->startOfDay())
+            ->unique(fn ($date) => $date->toDateString())
+            ->values();
+
+        if ($activityDays->isEmpty()) {
+            return 0;
+        }
+
+        $cursor = CarbonImmutable::today();
+        if (! $activityDays->contains(fn ($date) => $date->equalTo($cursor))) {
+            $cursor = $cursor->subDay();
+        }
+
+        $streak = 0;
+        while ($activityDays->contains(fn ($date) => $date->equalTo($cursor))) {
+            $streak++;
+            $cursor = $cursor->subDay();
+        }
+
+        return $streak;
     }
 
     public function completedExerciseIds(): array
