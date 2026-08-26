@@ -112,11 +112,14 @@
 
     function updateSoundButton() {
         const muted = soundsMuted();
-        const button = mascotToast.querySelector('[data-mascot-sound]');
-        button.setAttribute('aria-pressed', String(muted));
-        button.setAttribute('aria-label', muted ? 'Ativar sons' : 'Silenciar sons');
-        button.title = muted ? 'Ativar sons' : 'Silenciar sons';
-        mascotToast.querySelector('[data-sound-wave]').style.display = muted ? 'none' : '';
+        const button = mascotToast?.querySelector('[data-mascot-sound]');
+        if (button) {
+            button.setAttribute('aria-pressed', String(muted));
+            button.setAttribute('aria-label', muted ? 'Ativar sons' : 'Silenciar sons');
+            button.title = muted ? 'Ativar sons' : 'Silenciar sons';
+        }
+        const soundWave = mascotToast?.querySelector('[data-sound-wave]');
+        if (soundWave) soundWave.style.display = muted ? 'none' : '';
     }
 
     function playMascotSound(type) {
@@ -145,26 +148,33 @@
 
     function hideMascot() {
         clearTimeout(mascotTimer);
-        if (!mascotToast.classList.contains('visible')) return;
+        if (!mascotToast || !mascotToast.classList.contains('visible')) return;
         mascotToast.classList.add('leaving');
         setTimeout(() => {
-            mascotToast.classList.remove('visible', 'leaving', 'error', 'success');
-            mascotToast.setAttribute('aria-hidden', 'true');
+            if (mascotToast) {
+                mascotToast.classList.remove('visible', 'leaving', 'error', 'success');
+                mascotToast.setAttribute('aria-hidden', 'true');
+            }
         }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 210);
     }
 
     function showMascot(type) {
+        if (!mascotToast) return;
         const options = mascotMessages[type] || mascotMessages.error;
         const content = options[Math.floor(Math.random() * options.length)];
         clearTimeout(mascotTimer);
         mascotToast.classList.remove('visible', 'leaving', 'error', 'success');
-        mascotToast.querySelector('[data-mascot-image]').src = `/images/mascots/${content.image}`;
-        mascotToast.querySelector('[data-mascot-label]').textContent = type === 'success' ? 'Desafio concluído' : 'Nova tentativa';
-        mascotToast.querySelector('[data-mascot-title]').textContent = content.title;
-        mascotToast.querySelector('[data-mascot-message]').textContent = content.message;
+        const img = mascotToast.querySelector('[data-mascot-image]');
+        if (img) img.src = `/images/mascots/${content.image}`;
+        const label = mascotToast.querySelector('[data-mascot-label]');
+        if (label) label.textContent = type === 'success' ? 'Desafio concluído' : 'Nova tentativa';
+        const title = mascotToast.querySelector('[data-mascot-title]');
+        if (title) title.textContent = content.title;
+        const message = mascotToast.querySelector('[data-mascot-message]');
+        if (message) message.textContent = content.message;
         mascotToast.classList.add(type);
         mascotToast.setAttribute('aria-hidden', 'false');
-        requestAnimationFrame(() => mascotToast.classList.add('visible'));
+        requestAnimationFrame(() => mascotToast?.classList.add('visible'));
         playMascotSound(type);
         mascotTimer = setTimeout(hideMascot, type === 'success' ? 5200 : 4600);
     }
@@ -212,11 +222,16 @@
         if (reset) {
             event.preventDefault();
             const form = reset.closest('form');
-            const bytes = Uint8Array.from(atob(form.dataset.starterCode), character => character.charCodeAt(0));
-            const editor = form.querySelector('[name="code"]');
-            editor.value = new TextDecoder().decode(bytes);
-            localStorage.removeItem(editorStorageKey(editor));
-            document.querySelector('#exercise-result').innerHTML = '';
+            if (form && form.dataset.starterCode) {
+                const bytes = Uint8Array.from(atob(form.dataset.starterCode), character => character.charCodeAt(0));
+                const editor = form.querySelector('[name="code"]');
+                if (editor) {
+                    editor.value = new TextDecoder().decode(bytes);
+                    localStorage.removeItem(editorStorageKey(editor));
+                }
+            }
+            const exerciseResult = document.querySelector('#exercise-result');
+            if (exerciseResult) exerciseResult.innerHTML = '';
             return;
         }
 
@@ -236,31 +251,42 @@
             const button = event.submitter;
             const rewardTitle = rewardForm.closest('[data-reward-card]')?.querySelector('h3')?.textContent || 'esta recompensa';
             if (! window.confirm(`Resgatar ${rewardTitle}? O custo será descontado do seu saldo disponível.`)) return;
-            const oldText = button.textContent;
+            const oldText = button?.textContent;
             const feedback = document.querySelector('#reward-feedback');
-            button.disabled = true;
-            button.textContent = 'Resgatando...';
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Resgatando...';
+            }
             setLoading(true);
             try {
                 const response = await fetch(rewardForm.action, {method: 'POST', body: new FormData(rewardForm), headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}});
                 const data = await response.json();
                 if (!response.ok) throw new Error(Object.values(data.errors || {}).flat()[0] || data.message || 'Não foi possível resgatar.');
-                feedback.innerHTML = '<div class="feedback ok reward-toast" role="status"><strong></strong><span></span></div>';
-                feedback.querySelector('strong').textContent = data.message;
-                feedback.querySelector('span').textContent = `Código da conquista: ${data.code}`;
-                document.querySelector('[data-reward-available]').textContent = data.summary.available;
-                document.querySelector('[data-reward-spent]').textContent = data.summary.spent;
-                document.querySelector('[data-reward-count]').textContent = data.summary.redeemed;
+                if (feedback) {
+                    feedback.innerHTML = '<div class="feedback ok reward-toast" role="status"><strong></strong><span></span></div>';
+                    const strong = feedback.querySelector('strong');
+                    if (strong) strong.textContent = data.message;
+                    const span = feedback.querySelector('span');
+                    if (span) span.textContent = `Código da conquista: ${data.code}`;
+                }
+                const availEl = document.querySelector('[data-reward-available]');
+                if (availEl) availEl.textContent = data.summary.available;
+                const spentEl = document.querySelector('[data-reward-spent]');
+                if (spentEl) spentEl.textContent = data.summary.spent;
+                const countEl = document.querySelector('[data-reward-count]');
+                if (countEl) countEl.textContent = data.summary.redeemed;
                 const card = document.querySelector(`[data-reward-card="${data.rewardId}"]`);
                 card?.classList.add('redeemed');
                 card?.setAttribute('data-redeemed', 'true');
-                button.textContent = 'Resgatada';
-                button.classList.remove('btn-primary');
-                button.classList.add('btn-secondary');
+                if (button) {
+                    button.textContent = 'Resgatada';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-secondary');
+                }
                 document.querySelectorAll('[data-reward-card]').forEach(rewardCard => {
                     if (rewardCard.dataset.redeemed === 'true') return;
                     const rewardButton = rewardCard.querySelector('.reward-button');
-                    if (Number(rewardCard.dataset.rewardCost) > Number(data.summary.available)) {
+                    if (rewardButton && Number(rewardCard.dataset.rewardCost) > Number(data.summary.available)) {
                         rewardButton.disabled = true;
                         rewardButton.textContent = 'Saldo insuficiente';
                         rewardButton.classList.remove('btn-primary');
@@ -268,24 +294,31 @@
                     }
                 });
                 const history = document.querySelector('[data-reward-history]');
-                history.querySelector('.empty-ranking')?.remove();
-                const historyItem = document.createElement('article');
-                const historyCopy = document.createElement('div');
-                const historyTitle = document.createElement('strong');
-                const historyDate = document.createElement('span');
-                const historyCode = document.createElement('code');
-                historyTitle.textContent = data.rewardTitle;
-                historyDate.textContent = data.redeemedAt;
-                historyCode.textContent = data.code;
-                historyCopy.append(historyTitle, historyDate);
-                historyItem.append(historyCopy, historyCode);
-                history.prepend(historyItem);
-                feedback.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                if (history) {
+                    history.querySelector('.empty-ranking')?.remove();
+                    const historyItem = document.createElement('article');
+                    const historyCopy = document.createElement('div');
+                    const historyTitle = document.createElement('strong');
+                    const historyDate = document.createElement('span');
+                    const historyCode = document.createElement('code');
+                    historyTitle.textContent = data.rewardTitle;
+                    historyDate.textContent = data.redeemedAt;
+                    historyCode.textContent = data.code;
+                    historyCopy.append(historyTitle, historyDate);
+                    historyItem.append(historyCopy, historyCode);
+                    history.prepend(historyItem);
+                }
+                feedback?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
             } catch (error) {
-                feedback.innerHTML = '<p class="feedback bad reward-toast" role="alert"></p>';
-                feedback.querySelector('p').textContent = error.message || 'Falha de conexão. Tente novamente.';
-                button.disabled = false;
-                button.textContent = oldText;
+                if (feedback) {
+                    feedback.innerHTML = '<p class="feedback bad reward-toast" role="alert"></p>';
+                    const p = feedback.querySelector('p');
+                    if (p) p.textContent = error.message || 'Falha de conexão. Tente novamente.';
+                }
+                if (button) {
+                    button.disabled = false;
+                    if (oldText !== undefined) button.textContent = oldText;
+                }
             } finally {
                 setLoading(false);
             }
@@ -296,25 +329,31 @@
         if (profileForm) {
             event.preventDefault();
             const button = event.submitter;
-            const oldText = button.textContent;
-            button.disabled = true; button.textContent = 'Salvando...'; setLoading(true);
+            const oldText = button?.textContent;
+            if (button) { button.disabled = true; button.textContent = 'Salvando...'; }
+            setLoading(true);
             try {
                 const response = await fetch(profileForm.action, {method: 'POST', body: new FormData(profileForm), headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}});
                 const data = await response.json();
                 const feedback = document.querySelector('#profile-feedback');
                 if (!response.ok) {
-                    feedback.innerHTML = '<p class="feedback bad" role="alert"></p>';
-                    feedback.querySelector('p').textContent = Object.values(data.errors || {}).flat()[0] || data.message;
+                    if (feedback) {
+                        feedback.innerHTML = '<p class="feedback bad" role="alert"></p>';
+                        const p = feedback.querySelector('p');
+                        if (p) p.textContent = Object.values(data.errors || {}).flat()[0] || data.message;
+                    }
                     return;
                 }
-                feedback.innerHTML = '<p class="feedback ok">Nome atualizado com sucesso.</p>';
+                if (feedback) feedback.innerHTML = '<p class="feedback ok">Nome atualizado com sucesso.</p>';
                 document.querySelectorAll('.ranking-table tr.current .rank-name').forEach(cell => {
-                    cell.childNodes[0].textContent = data.displayName;
+                    if (cell.childNodes[0]) cell.childNodes[0].textContent = data.displayName;
                 });
             } catch (error) {
-                document.querySelector('#profile-feedback').innerHTML = '<p class="feedback bad">Falha de conexão. Tente novamente.</p>';
+                const feedback = document.querySelector('#profile-feedback');
+                if (feedback) feedback.innerHTML = '<p class="feedback bad">Falha de conexão. Tente novamente.</p>';
             } finally {
-                button.disabled = false; button.textContent = oldText; setLoading(false);
+                if (button) { button.disabled = false; if (oldText !== undefined) button.textContent = oldText; }
+                setLoading(false);
             }
             return;
         }
@@ -341,19 +380,25 @@
                 console.error('Resposta inesperada do servidor:', responseText);
                 throw new Error(`O servidor respondeu com erro ${response.status}. Atualize a página e tente novamente.`);
             }
+            const exerciseResult = document.querySelector('#exercise-result');
             if (!response.ok) {
                 const message = Object.values(data.errors || {}).flat()[0] || data.message || 'Não foi possível concluir a ação.';
-                document.querySelector('#exercise-result').innerHTML = `<section class="result-card"><div class="feedback bad" role="alert"></div></section>`;
-                document.querySelector('#exercise-result .feedback').textContent = message;
+                if (exerciseResult) {
+                    exerciseResult.innerHTML = `<section class="result-card"><div class="feedback bad" role="alert"></div></section>`;
+                    const feedbackEl = exerciseResult.querySelector('.feedback');
+                    if (feedbackEl) feedbackEl.textContent = message;
+                }
                 return;
             }
-            document.querySelector('#exercise-result').innerHTML = data.html;
-            if (data.progressWarning) {
-                const warning = document.createElement('p');
-                warning.className = 'feedback bad';
-                warning.setAttribute('role', 'alert');
-                warning.textContent = data.progressWarning;
-                document.querySelector('#exercise-result').prepend(warning);
+            if (exerciseResult) {
+                exerciseResult.innerHTML = data.html;
+                if (data.progressWarning) {
+                    const warning = document.createElement('p');
+                    warning.className = 'feedback bad';
+                    warning.setAttribute('role', 'alert');
+                    warning.textContent = data.progressWarning;
+                    exerciseResult.prepend(warning);
+                }
             }
             if (data.gamification?.type) {
                 try {
@@ -362,24 +407,31 @@
                     console.error('Não foi possível mostrar o mascote:', error);
                 }
             }
-            document.querySelector('#exercise-result').scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            exerciseResult?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
             if (data.stats) {
-                document.querySelector('[data-progress-percent]').textContent = `${data.stats.percent}%`;
-                document.querySelector('[data-progress-bar]').style.width = `${data.stats.percent}%`;
-                document.querySelector('[data-progress-count]').textContent = `${data.stats.completed} de ${data.stats.total} exercícios`;
+                const percentEl = document.querySelector('[data-progress-percent]');
+                if (percentEl) percentEl.textContent = `${data.stats.percent}%`;
+                const barEl = document.querySelector('[data-progress-bar]');
+                if (barEl) barEl.style.width = `${data.stats.percent}%`;
+                const countEl = document.querySelector('[data-progress-count]');
+                if (countEl) countEl.textContent = `${data.stats.completed} de ${data.stats.total} exercícios`;
                 const xpBadge = document.querySelector('[data-xp]');
                 const xpValue = xpBadge?.querySelector('[data-xp-value]');
                 if (xpValue) xpValue.textContent = `${data.stats.xp} XP`;
                 xpBadge?.classList.remove('xp-pop');
                 requestAnimationFrame(() => xpBadge?.classList.add('xp-pop'));
                 const status = document.querySelector(`[data-exercise-id="${data.exerciseId}"] .exercise-status`);
-                if (status && data.html.includes('Resposta correta!')) status.textContent = '✓';
+                if (status && data.html && data.html.includes('Resposta correta!')) status.textContent = '✓';
             }
         } catch (error) {
-            document.querySelector('#exercise-result').innerHTML = '<section class="result-card"><div class="feedback bad" role="alert"></div></section>';
-            document.querySelector('#exercise-result .feedback').textContent = error.message || 'Não foi possível falar com o servidor. Verifique sua conexão e tente novamente.';
+            const exerciseResult = document.querySelector('#exercise-result');
+            if (exerciseResult) {
+                exerciseResult.innerHTML = '<section class="result-card"><div class="feedback bad" role="alert"></div></section>';
+                const feedbackEl = exerciseResult.querySelector('.feedback');
+                if (feedbackEl) feedbackEl.textContent = error.message || 'Não foi possível falar com o servidor. Verifique sua conexão e tente novamente.';
+            }
         } finally {
-            if (button) { button.disabled = false; button.textContent = oldText; }
+            if (button) { button.disabled = false; if (oldText !== undefined) button.textContent = oldText; }
             setLoading(false);
         }
     });
@@ -403,7 +455,7 @@
     });
 
     document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && mascotToast.classList.contains('visible')) {
+        if (event.key === 'Escape' && mascotToast?.classList.contains('visible')) {
             hideMascot();
             return;
         }
@@ -442,7 +494,10 @@
     });
 
     restoreEditors();
-    new MutationObserver(restoreEditors).observe(document.querySelector('.content'), {childList:true, subtree:true});
+    const contentArea = document.querySelector('.content');
+    if (contentArea) {
+        new MutationObserver(restoreEditors).observe(contentArea, {childList:true, subtree:true});
+    }
 })();
 </script>
 </body></html>
