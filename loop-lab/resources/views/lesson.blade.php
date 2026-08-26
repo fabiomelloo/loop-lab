@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $lesson->title.' — PHP na Prática')
+@section('title', $lesson->title.' — Loop Lab')
 @section('content')
 @php
     $currentIndex = $lesson->exercises->search(fn ($item) => $item->is($exercise));

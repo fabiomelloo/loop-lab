@@ -1,110 +1,39 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $mode === 'cadastro' ? 'Criar conta' : 'Entrar' }} — PHP na Prática</title>
+    <title>{{ $mode === 'cadastro' ? 'Criar conta' : 'Entrar' }} — Loop Lab</title>
     <style>
-        body {
-            margin: 0;
-            display: grid;
-            place-items: center;
-            min-height: 100vh;
-            background: #f4f7fb;
-            color: #172033;
-            font: 16px/1.6 Arial;
-        }
-
-        .box {
-            width: min(440px, calc(100% - 32px));
-            padding: 30px;
-            border: 1px solid #dbe3ef;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 16px 45px rgba(20, 38, 70, 0.08);
-        }
-
-        h1 {
-            margin: 0 0 6px;
-        }
-
-        label {
-            display: block;
-            margin-top: 16px;
-            font-weight: 700;
-        }
-
-        input, button {
-            width: 100%;
-            min-height: 48px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font: inherit;
-            box-sizing: border-box;
-        }
-
-        input {
-            border: 1px solid #cbd5e1;
-        }
-
-        button {
-            margin-top: 22px;
-            border: 0;
-            background: #2563eb;
-            color: #fff;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
-        .error {
-            color: #b42318;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
+        :root{--ink:#172033;--muted:#667085;--line:#e3e6ef;--indigo:#4f46e5;--green:#22c55e}*{box-sizing:border-box}html,body{max-width:100%;overflow-x:hidden}body{margin:0;min-height:100vh;background:#f5f6fb;color:var(--ink);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit}.auth-shell{display:grid;grid-template-columns:minmax(320px,.85fr) minmax(500px,1.15fr);width:100%;min-height:100vh}.auth-brand-panel{position:relative;display:flex;min-width:0;flex-direction:column;justify-content:space-between;overflow:hidden;padding:38px;background:linear-gradient(145deg,#111827,#172554);color:#fff}.auth-brand-panel:before,.auth-brand-panel:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.08);border-radius:50%}.auth-brand-panel:before{right:-150px;bottom:-150px;width:460px;height:460px}.auth-brand-panel:after{right:-50px;bottom:-50px;width:260px;height:260px}.auth-brand{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:max-content;max-width:100%;text-decoration:none}.brand-emblem{display:grid;place-items:center;width:46px;height:46px;border:1px solid rgba(255,255,255,.2);border-radius:15px;background:linear-gradient(145deg,#6366f1,#4338ca);box-shadow:0 10px 24px rgba(79,70,229,.4),inset 0 1px 0 rgba(255,255,255,.25)}.brand-emblem svg{width:35px;height:35px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.brand-wordmark{display:grid;line-height:1}.brand-wordmark>span{font-size:22px;letter-spacing:-.04em}.brand-wordmark strong{color:#fff}.brand-wordmark b{margin-left:3px;color:#86efac}.brand-wordmark small{margin-top:7px;color:#94a3b8;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.auth-pitch{position:relative;z-index:1;max-width:470px;margin:auto 0}.auth-kicker{display:inline-flex;align-items:center;gap:8px;color:#86efac;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.auth-kicker:before{content:"";width:7px;height:7px;border-radius:3px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12)}.auth-pitch h1{max-width:420px;margin:14px 0;font-size:clamp(36px,4vw,54px);line-height:1.05;letter-spacing:-.045em;overflow-wrap:anywhere}.auth-pitch p{max-width:430px;color:#bac5d6;font-size:17px}.code-medallion{display:grid;place-items:center;width:116px;height:116px;margin-top:34px;border:1px solid rgba(255,255,255,.14);border-radius:34px;background:rgba(99,102,241,.17);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 25px 50px rgba(0,0,0,.2);font:900 23px ui-monospace,monospace;transform:rotate(-5deg)}.auth-proof{position:relative;z-index:1;display:flex;gap:22px;color:#94a3b8;font-size:12px}.auth-proof span{display:flex;align-items:center;gap:7px}.auth-proof span:before{content:"✓";display:grid;place-items:center;width:20px;height:20px;border-radius:7px;background:rgba(34,197,94,.14);color:#86efac;font-weight:900}.auth-content{display:grid;min-width:0;place-items:center;padding:40px;background-image:radial-gradient(circle at 90% 5%,rgba(99,102,241,.1),transparent 26rem)}.auth-box,.auth-form{min-width:0}.auth-box{width:min(440px,100%)}.auth-box h2{margin:0 0 6px;font-size:34px;line-height:1.15;letter-spacing:-.035em}.auth-intro{margin:0 0 28px;color:var(--muted)}.auth-form{padding:28px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 20px 50px rgba(30,41,59,.08),inset 0 1px 0 #fff}.field{min-width:0;margin-bottom:17px}.field label{display:block;margin-bottom:7px;color:#344054;font-size:13px;font-weight:800}.field input{display:block;width:100%;min-width:0;min-height:48px;padding:10px 13px;border:1px solid #d4d9e4;border-radius:12px;background:#f8fafc;color:var(--ink);font:inherit}.field input:focus{outline:3px solid #c7d2fe;border-color:#6366f1;background:#fff}.submit-button{width:100%;min-height:48px;margin-top:5px;border:1px solid #16a34a;border-radius:12px;background:#22c55e;color:#052e16;font:800 15px inherit;box-shadow:0 4px 0 #15803d,0 10px 20px rgba(34,197,94,.18);cursor:pointer;transition:.2s}.submit-button:hover{background:#4ade80;transform:translateY(-1px)}.submit-button:focus-visible,.auth-link:focus-visible,.auth-brand:focus-visible{outline:3px solid #a5b4fc;outline-offset:3px}.error-list{margin:0 0 18px;padding:12px 14px;border:1px solid #fecaca;border-radius:12px;background:#fff1f2;color:#9f1239;font-size:13px}.auth-switch{margin:22px 0 10px;color:var(--muted);text-align:center}.auth-switch a,.guest-link{color:#4338ca;font-weight:800}.guest-link{display:block;text-align:center}.auth-note{margin-top:26px;color:#98a2b3;font-size:11px;text-align:center}@media(max-width:850px){.auth-shell{grid-template-columns:minmax(0,1fr)}.auth-brand-panel{min-height:auto;padding:24px}.auth-pitch{margin:48px 0 30px}.auth-pitch h1{font-size:38px}.code-medallion,.auth-proof{display:none}.auth-content{padding:34px 20px}}@media(max-width:480px){.auth-pitch{margin:34px 0 18px}.auth-pitch h1{font-size:32px}.auth-content{padding:28px 16px}.auth-form{padding:22px}.auth-box h2{font-size:29px}}@media(prefers-reduced-motion:reduce){.submit-button{transition:none}.submit-button:hover{transform:none}}
     </style>
 </head>
 <body>
-    <main class="box">
-        <h1>{{ $mode === 'cadastro' ? 'Criar sua conta' : 'Bem-vindo de volta' }}</h1>
-        <p>Salve seu progresso e continue em qualquer dispositivo.</p>
-
-        <form method="POST" action="{{ $mode === 'cadastro' ? route('register', absolute: false) : route('login.submit', absolute: false) }}">
-            @csrf
-
-            @if($mode === 'cadastro')
-                <label for="name">Nome</label>
-                <input id="name" name="name" value="{{ old('name') }}" required>
-            @endif
-
-            <label for="email">E-mail</label>
-            <input id="email" name="email" type="email" value="{{ old('email') }}" required>
-
-            <label for="password">Senha</label>
-            <input id="password" name="password" type="password" required>
-
-            @if($mode === 'cadastro')
-                <label for="password_confirmation">Confirmar senha</label>
-                <input id="password_confirmation" name="password_confirmation" type="password" required>
-            @endif
-
-            @foreach($errors->all() as $error)
-                <p class="error">{{ $error }}</p>
-            @endforeach
-
-            <button>{{ $mode === 'cadastro' ? 'Criar conta' : 'Entrar' }}</button>
-        </form>
-
-        <p>
-            @if($mode === 'cadastro')
-                Já possui conta? <a href="{{ route('login') }}">Entrar</a>
-            @else
-                Ainda não possui conta? <a href="{{ route('login', ['mode' => 'cadastro']) }}">Criar conta</a>
-            @endif
-        </p>
-
-        <a href="{{ route('dashboard') }}">Continuar sem conta</a>
-    </main>
+<main class="auth-shell">
+    <section class="auth-brand-panel">
+        <a class="auth-brand" href="{{ route('dashboard') }}" aria-label="Loop Lab — início"><x-brand-logo /></a>
+        <div class="auth-pitch"><span class="auth-kicker">Aprenda fazendo</span><h1>Seu código evolui. Você também.</h1><p>Estude PHP em uma trilha prática, receba feedback imediato e acompanhe cada conquista.</p><div class="code-medallion" aria-hidden="true">&lt;?php</div></div>
+        <div class="auth-proof"><span>Progresso salvo</span><span>Exercícios práticos</span><span>XP e ranking</span></div>
+    </section>
+    <section class="auth-content">
+        <div class="auth-box">
+            <span class="auth-kicker">{{ $mode === 'cadastro' ? 'Comece sua jornada' : 'Continue sua jornada' }}</span>
+            <h2>{{ $mode === 'cadastro' ? 'Criar sua conta' : 'Bem-vindo de volta' }}</h2>
+            <p class="auth-intro">{{ $mode === 'cadastro' ? 'Crie seu perfil e não perca seu progresso.' : 'Entre para continuar exatamente de onde parou.' }}</p>
+            <form class="auth-form" method="POST" action="{{ $mode === 'cadastro' ? route('register', absolute: false) : route('login.submit', absolute: false) }}">
+                @csrf
+                @if($errors->any())<div class="error-list" role="alert">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+                @if($mode === 'cadastro')<div class="field"><label for="name">Nome</label><input id="name" name="name" value="{{ old('name') }}" autocomplete="name" required></div>@endif
+                <div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="email" required></div>
+                <div class="field"><label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="{{ $mode === 'cadastro' ? 'new-password' : 'current-password' }}" required></div>
+                @if($mode === 'cadastro')<div class="field"><label for="password_confirmation">Confirmar senha</label><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required></div>@endif
+                <button class="submit-button" type="submit">{{ $mode === 'cadastro' ? 'Criar conta' : 'Entrar' }}</button>
+            </form>
+            <p class="auth-switch">@if($mode === 'cadastro')Já possui conta? <a class="auth-link" href="{{ route('login') }}">Entrar</a>@elseAinda não possui conta? <a class="auth-link" href="{{ route('login', ['mode' => 'cadastro']) }}">Criar conta</a>@endif</p>
+            <a class="guest-link" href="{{ route('dashboard') }}">Continuar sem conta</a>
+            <p class="auth-note">Ambiente educacional para prática de PHP.</p>
+        </div>
+    </section>
+</main>
 </body>
 </html>

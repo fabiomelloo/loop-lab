@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Recompensas — PHP na Prática')
+@section('title', 'Recompensas — Loop Lab')
 
 @section('content')
 <section class="reward-hero">

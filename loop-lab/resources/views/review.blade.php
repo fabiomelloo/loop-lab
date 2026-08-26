@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Revisar — PHP na Prática')
+@section('title', 'Revisar — Loop Lab')
 @section('content')
 <span class="eyebrow">Aprendizado adaptativo</span><h1>Revisar seus erros</h1><p class="lead">Aqui aparecem exercícios que você tentou e ainda não concluiu. Resolva os mais recentes primeiro.</p>
 <div class="stack" style="margin-top:28px">

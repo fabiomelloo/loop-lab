@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Início — PHP na Prática')
+@section('title', 'Início — Loop Lab')
 @section('content')
 <div class="dashboard-heading">
     <div><span class="eyebrow">Continue aprendendo</span><h1>Olá, {{ $learner->display_name }}!</h1><p class="lead">Um passo por vez. Sua próxima missão já está pronta.</p></div>
