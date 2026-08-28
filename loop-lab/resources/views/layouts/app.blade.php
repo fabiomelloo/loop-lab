@@ -49,6 +49,9 @@
         @media(max-width:560px){.card{padding:20px}.page-jump a{padding:8px 10px}.profile-form{align-items:stretch;flex-direction:column}.profile-form>div,.profile-form input{width:100%}.ranking-table{min-width:650px}.ranking-shell{overflow-x:auto!important}.reward-card:hover,.exercise-item:hover{transform:none}}
         @media(prefers-reduced-motion:reduce){.btn,.exercise-item,.ranking-table tbody tr{transition:none}.btn:hover,.exercise-item:hover{transform:none}}
     </style>
+    <style>
+        .glossary-help{display:flex;align-items:center;gap:9px;width:max-content;max-width:100%;margin:18px 0 0;padding:9px 13px;border:1px solid #c7d2fe;border-radius:12px;background:#f5f3ff;color:#514b70;font-size:13px;font-weight:700}.glossary-term{display:inline;border-bottom:2px dotted #818cf8;color:inherit;font-weight:650;cursor:help;text-decoration:none;outline:0;transition:color .18s,background .18s,border-color .18s}.glossary-term:hover,.glossary-term:focus-visible,.glossary-term.active{border-color:#4f46e5;border-radius:4px;background:#eef2ff;color:#3730a3}.code .glossary-term,.editor-card .glossary-term{border-color:#6ee7b7;color:inherit}.code .glossary-term:hover,.code .glossary-term:focus-visible,.code .glossary-term.active{background:#183044;color:#a7f3d0}.glossary-tooltip{position:fixed;z-index:1100;width:min(340px,calc(100vw - 24px));padding:16px;border:1px solid #c7d2fe;border-radius:16px;background:#fff;color:#172033;box-shadow:0 20px 55px rgba(15,23,42,.24),inset 0 1px 0 #fff;opacity:0;transform:translateY(5px) scale(.98);pointer-events:none;transition:opacity .16s ease,transform .16s ease}.glossary-tooltip:after{content:"";position:absolute;left:50%;width:12px;height:12px;border-right:1px solid #c7d2fe;border-bottom:1px solid #c7d2fe;background:#fff;transform:translateX(-50%) rotate(45deg)}.glossary-tooltip[data-placement="top"]:after{bottom:-7px}.glossary-tooltip[data-placement="bottom"]:after{top:-7px;transform:translateX(-50%) rotate(225deg)}.glossary-tooltip.visible{opacity:1;transform:translateY(0) scale(1)}.glossary-tooltip[hidden]{display:none}.glossary-tooltip-label{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#4338ca;font-size:14px;font-weight:900}.glossary-tooltip-label:before{content:"?";display:grid;place-items:center;width:22px;height:22px;border-radius:8px;background:#eef2ff;color:#4f46e5;font-size:12px}.glossary-tooltip-definition{margin:0;color:#475467;font-size:13px;line-height:1.5}.glossary-tooltip-example{display:block;margin-top:10px;padding:8px 10px;border:1px solid #263244;border-radius:9px;background:#111827;color:#a7f3d0;font:12px/1.45 Consolas,ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:560px){.glossary-help{width:100%;align-items:flex-start}.glossary-term{padding:2px 0}.glossary-tooltip{padding:14px}}@media(prefers-reduced-motion:reduce){.glossary-term,.glossary-tooltip{transition:none}}
+    </style>
 </head>
 <body><div class="ajax-loader" aria-hidden="true"></div><div class="shell">
     <aside class="sidebar">
@@ -88,6 +91,11 @@
         <button class="mascot-icon-btn" type="button" data-mascot-close aria-label="Fechar mensagem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     </div>
 </aside>
+<aside class="glossary-tooltip" id="glossary-tooltip" role="tooltip" aria-live="polite" hidden>
+    <strong class="glossary-tooltip-label" data-glossary-label></strong>
+    <p class="glossary-tooltip-definition" data-glossary-definition></p>
+    <code class="glossary-tooltip-example" data-glossary-example></code>
+</aside>
 <script>
 (() => {
     const loader = () => document.querySelector('.ajax-loader');
@@ -95,6 +103,17 @@
     const mascotToast = document.querySelector('[data-mascot-toast]');
     let mascotTimer;
     let audioContext;
+    let activeGlossaryTerm;
+    let glossaryHideTimer;
+    const glossaryTooltip = document.querySelector('#glossary-tooltip');
+    const glossaryTerms = @json(config('learning_glossary.terms'));
+    const glossaryProcessedNodes = new WeakSet();
+    const glossaryEntries = Object.entries(glossaryTerms).sort((a, b) => b[0].length - a[0].length);
+    const glossaryByLabel = new Map(glossaryEntries.map(([label, details]) => [label.toLocaleLowerCase('pt-BR'), {label, ...details}]));
+    const glossaryExpression = new RegExp([
+        '\\$[A-Za-z_][A-Za-z0-9_]*',
+        ...glossaryEntries.map(([label]) => label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    ].join('|'), 'giu');
     const mascotMessages = {
         error: [
             {image: 'try-again.webp', title: 'Quase lá!', message: 'Leia o diagnóstico, ajuste uma parte e tente de novo.'},
@@ -179,6 +198,106 @@
         mascotTimer = setTimeout(hideMascot, type === 'success' ? 5200 : 4600);
     }
 
+    function isGlossaryWordCharacter(character) {
+        return Boolean(character && /[\p{L}\p{N}_]/u.test(character));
+    }
+
+    function enhanceGlossary() {
+        const page = document.querySelector('.page');
+        if (! page) return;
+
+        const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+                if (! node.data.trim() || glossaryProcessedNodes.has(node)) return NodeFilter.FILTER_REJECT;
+                if (node.parentElement?.closest('textarea,input,button,a,script,style,svg,.glossary-term,[data-no-glossary]')) return NodeFilter.FILTER_REJECT;
+
+                return NodeFilter.FILTER_ACCEPT;
+            },
+        });
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+
+        nodes.forEach(node => {
+            glossaryProcessedNodes.add(node);
+            const text = node.data;
+            const fragment = document.createDocumentFragment();
+            let cursor = 0;
+            let foundTerm = false;
+            glossaryExpression.lastIndex = 0;
+
+            for (const match of text.matchAll(glossaryExpression)) {
+                const matchedText = match[0];
+                const start = match.index;
+                const end = start + matchedText.length;
+                const startsWithWord = isGlossaryWordCharacter(matchedText[0]);
+                const endsWithWord = isGlossaryWordCharacter(matchedText[matchedText.length - 1]);
+                if ((startsWithWord && isGlossaryWordCharacter(text[start - 1])) || (endsWithWord && isGlossaryWordCharacter(text[end]))) continue;
+
+                const exactDetails = glossaryByLabel.get(matchedText.toLocaleLowerCase('pt-BR'));
+                const details = exactDetails || (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(matchedText)
+                    ? {label: 'variável PHP', ...glossaryTerms['variável PHP']}
+                    : null);
+                if (! details) continue;
+                fragment.append(document.createTextNode(text.slice(cursor, start)));
+                const term = document.createElement('span');
+                term.className = 'glossary-term';
+                term.dataset.glossaryKey = details.label;
+                term.textContent = matchedText;
+                term.tabIndex = 0;
+                term.setAttribute('role', 'term');
+                term.setAttribute('aria-describedby', 'glossary-tooltip');
+                term.setAttribute('aria-label', `${matchedText}: ${details.definition}`);
+                fragment.append(term);
+                cursor = end;
+                foundTerm = true;
+            }
+
+            if (! foundTerm) return;
+            fragment.append(document.createTextNode(text.slice(cursor)));
+            node.replaceWith(fragment);
+        });
+    }
+
+    function showGlossary(term) {
+        const details = glossaryTerms[term.dataset.glossaryKey];
+        if (! details || ! glossaryTooltip) return;
+        clearTimeout(glossaryHideTimer);
+        activeGlossaryTerm?.classList.remove('active');
+        activeGlossaryTerm = term;
+        term.classList.add('active');
+        glossaryTooltip.querySelector('[data-glossary-label]').textContent = term.textContent;
+        glossaryTooltip.querySelector('[data-glossary-definition]').textContent = details.definition;
+        const example = glossaryTooltip.querySelector('[data-glossary-example]');
+        example.textContent = details.example || '';
+        example.hidden = ! details.example;
+        glossaryTooltip.hidden = false;
+        glossaryTooltip.classList.add('visible');
+
+        const termRect = term.getBoundingClientRect();
+        const tooltipRect = glossaryTooltip.getBoundingClientRect();
+        const margin = 12;
+        const left = Math.max(margin, Math.min(window.innerWidth - tooltipRect.width - margin, termRect.left + termRect.width / 2 - tooltipRect.width / 2));
+        let top = termRect.top - tooltipRect.height - 10;
+        let placement = 'top';
+        if (top < margin) {
+            top = Math.min(window.innerHeight - tooltipRect.height - margin, termRect.bottom + 10);
+            placement = 'bottom';
+        }
+        glossaryTooltip.dataset.placement = placement;
+        glossaryTooltip.style.left = `${left}px`;
+        glossaryTooltip.style.top = `${Math.max(margin, top)}px`;
+    }
+
+    function hideGlossary(delay = 0) {
+        clearTimeout(glossaryHideTimer);
+        glossaryHideTimer = setTimeout(() => {
+            activeGlossaryTerm?.classList.remove('active');
+            activeGlossaryTerm = null;
+            glossaryTooltip?.classList.remove('visible');
+            if (glossaryTooltip) glossaryTooltip.hidden = true;
+        }, delay);
+    }
+
     updateSoundButton();
 
     async function navigate(url, push = true) {
@@ -195,6 +314,8 @@
                 return;
             }
             currentShell.replaceWith(newShell);
+            enhanceGlossary();
+            restoreEditors();
             document.title = page.title;
             if (push) history.pushState({}, '', url);
             const hash = new URL(url, location.href).hash;
@@ -207,7 +328,36 @@
         }
     }
 
+    document.addEventListener('mouseover', event => {
+        const term = event.target.closest?.('.glossary-term');
+        if (term) showGlossary(term);
+    });
+
+    document.addEventListener('mouseout', event => {
+        const term = event.target.closest?.('.glossary-term');
+        if (term && ! term.contains(event.relatedTarget)) hideGlossary(90);
+    });
+
+    document.addEventListener('focusin', event => {
+        const term = event.target.closest?.('.glossary-term');
+        if (term) showGlossary(term);
+    });
+
+    document.addEventListener('focusout', event => {
+        if (event.target.closest?.('.glossary-term')) hideGlossary(90);
+    });
+
+    addEventListener('scroll', () => hideGlossary(), {passive: true});
+    addEventListener('resize', () => hideGlossary(), {passive: true});
+
     document.addEventListener('click', (event) => {
+        const glossaryTerm = event.target.closest?.('.glossary-term');
+        if (glossaryTerm) {
+            event.preventDefault();
+            showGlossary(glossaryTerm);
+            return;
+        }
+        if (! glossaryTooltip?.hidden) hideGlossary();
         if (event.target.closest('[data-mascot-close]')) {
             hideMascot();
             return;
@@ -455,6 +605,11 @@
     });
 
     document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && ! glossaryTooltip?.hidden) {
+            hideGlossary();
+            activeGlossaryTerm?.focus();
+            return;
+        }
         if (event.key === 'Escape' && mascotToast?.classList.contains('visible')) {
             hideMascot();
             return;
@@ -494,9 +649,12 @@
     });
 
     restoreEditors();
-    const contentArea = document.querySelector('.content');
-    if (contentArea) {
-        new MutationObserver(restoreEditors).observe(contentArea, {childList:true, subtree:true});
+    enhanceGlossary();
+    if (document.body) {
+        new MutationObserver(() => {
+            restoreEditors();
+            enhanceGlossary();
+        }).observe(document.body, {childList:true, subtree:true});
     }
 })();
 </script>

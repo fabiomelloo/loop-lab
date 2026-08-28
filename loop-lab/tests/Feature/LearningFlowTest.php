@@ -360,6 +360,24 @@ class LearningFlowTest extends TestCase
             ->assertDontSee("editor.addEventListener('keydown'", false);
     }
 
+    public function test_lessons_include_an_accessible_glossary_for_technical_terms(): void
+    {
+        $terms = config('learning_glossary.terms');
+
+        $this->assertGreaterThan(120, count($terms));
+        foreach (['PHP', 'POO', 'MVC', 'ORM', 'CRUD', 'Eloquent', 'sintaxe', 'variável PHP', 'foreach', '===', '||', 'array_map'] as $term) {
+            $this->assertArrayHasKey($term, $terms);
+            $this->assertNotEmpty($terms[$term]['definition']);
+        }
+
+        $this->get('/aulas/loop-for')
+            ->assertOk()
+            ->assertSee('id="glossary-tooltip"', false)
+            ->assertSee('Passe o mouse, use Tab ou toque', false)
+            ->assertSee('glossaryTerms', false)
+            ->assertSee('aria-describedby', false);
+    }
+
     public function test_last_exercise_recommends_the_next_lesson(): void
     {
         $lesson = Lesson::where('slug', 'fundamentos-variaveis')->firstOrFail();

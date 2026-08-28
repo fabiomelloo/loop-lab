@@ -8,6 +8,7 @@
 <span class="eyebrow">{{ $lesson->module->title }} · Aula</span>
 <h1>{{ $lesson->title }}</h1>
 <p class="lead">{{ $lesson->summary }}</p>
+<p class="glossary-help" data-no-glossary><span aria-hidden="true">💡</span> Passe o mouse, use Tab ou toque nas palavras pontilhadas para ver uma explicação simples.</p>
 
 <nav class="page-jump" aria-label="Navegação dentro da aula">
     <a href="#aprender">1. Aprender</a>
